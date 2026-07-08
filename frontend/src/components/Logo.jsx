@@ -1,0 +1,38 @@
+import React from 'react';
+
+const Logo = ({ className = "w-8 h-8", style }) => {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 100 100" 
+      className={className} 
+      style={style}
+      fill="none"
+    >
+      <path 
+        d="M20 50L50 20L80 50V80H20V50Z" 
+        fill="currentColor" 
+        opacity="0.2"
+      />
+      <path 
+        d="M50 20L20 50V80H80V50L50 20Z" 
+        stroke="currentColor" 
+        strokeWidth="6" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+      <path 
+        d="M50 90A40 40 0 1 1 50 10A40 40 0 1 1 50 90Z" 
+        stroke="currentColor" 
+        strokeWidth="6" 
+        strokeLinecap="round"
+        strokeDasharray="10 10"
+      />
+      <circle cx="35" cy="55" r="5" fill="currentColor" />
+      <circle cx="65" cy="55" r="5" fill="currentColor" />
+      <path d="M40 70C40 70 45 75 50 75C55 75 60 70 60 70" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  );
+};
+
+export default Logo;

@@ -1,9 +1,66 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-tertiary-container: #dbddfe;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-secondary-container: #4f5257;
+  --color-on-primary: #f5f7ff;
+  --color-surface-tint: #575f6b;
+  --color-inverse-primary: #e4ebfa;
+  --color-primary-fixed: #dbe3f1;
+  --color-surface-variant: #e3e2e4;
+  --color-primary: #575f6b;
+  --color-error: #9f403d;
+  --color-on-tertiary-container: #4b4e69;
+  --color-secondary-fixed: #e1e2e8;
+  --color-tertiary: #5a5d78;
+  --color-tertiary-fixed-dim: #cdcfef;
+  --color-primary-dim: #4b535f;
+  --color-on-background: #323234;
+  --color-on-surface: #323234;
+  --color-error-dim: #4e0309;
+  --color-on-surface-variant: #5f5f61;
+  --color-on-secondary-fixed-variant: #595b61;
+  --color-on-secondary: #f7f9ff;
+  --color-on-error-container: #752121;
+  --color-on-primary-fixed: #38404b;
+  --color-primary-container: #dbe3f1;
+  --color-secondary-container: #e1e2e8;
+  --color-inverse-on-surface: #9e9c9d;
+  --color-surface-dim: #dad9dd;
+  --color-on-primary-fixed-variant: #545c68;
+  --color-surface-bright: #fcf8f9;
+  --color-surface: #fcf8f9;
+  --color-outline: #7a7a7d;
+  --color-on-tertiary-fixed-variant: #555873;
+  --color-on-tertiary: #faf8ff;
+  --color-inverse-surface: #0e0e0f;
+  --color-surface-container-high: #e9e7ea;
+  --color-surface-container: #efedef;
+  --color-on-tertiary-fixed: #383c55;
+  --color-secondary-dim: #515358;
+  --color-error-container: #fe8983;
+  --color-surface-container-highest: #e3e2e4;
+  --color-on-primary-container: #4a525e;
+  --color-secondary-fixed-dim: #d3d4da;
+  --color-tertiary-fixed: #dbddfe;
+  --color-on-error: #fff7f6;
+  --color-background: #fcf8f9;
+  --color-secondary: #5d5f64;
+  --color-tertiary-dim: #4e516c;
+  --color-on-secondary-fixed: #3d3f44;
+  --color-primary-fixed-dim: #cdd5e3;
+  --color-outline-variant: #b2b1b4;
+  --color-surface-container-low: #f6f3f4;
+  
+  --font-headline: "Inter", sans-serif;
+  --font-display: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Public Sans", sans-serif;
+}
 
 @layer base {
   body {
-    @apply antialiased text-gray-900 bg-gray-50;
+    @apply antialiased font-body bg-surface text-on-surface;
   }
 }

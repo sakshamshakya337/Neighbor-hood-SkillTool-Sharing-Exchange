@@ -1,5 +1,5 @@
 //dns for mongodb ( don't remove it anyhow)
-import dns from "node:dns";
+const dns = require("node:dns");
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 const app = require("./app");
