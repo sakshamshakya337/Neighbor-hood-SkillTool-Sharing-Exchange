@@ -1,6 +1,4 @@
-//dns for mongodb ( don't remove it anyhow)
-const dns = require("node:dns");
-dns.setServers(["1.1.1.1", "8.8.8.8"]);
+// Default DNS resolution is used to avoid SRV lookup failures on certain networks
 
 const app = require("./app");
 
