@@ -1,7 +1,13 @@
 import axios from 'axios';
 
+// In development: use localhost:5000
+// In production (Vercel): use same-domain relative URLs (empty string)
+const BASE_URL = import.meta.env.DEV
+  ? (import.meta.env.VITE_API_URL || 'http://localhost:5000')
+  : '';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
+  baseURL: BASE_URL,
   withCredentials: true,
 });
 
@@ -25,7 +31,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const { data } = await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/refresh-token`,
+          `${BASE_URL}/api/auth/refresh-token`,
           {},
           { withCredentials: true }
         );

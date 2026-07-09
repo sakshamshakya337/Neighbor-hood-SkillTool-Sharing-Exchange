@@ -22,6 +22,7 @@ app.use(cookieParser());
 // CORS config — allow any localhost port in dev, CLIENT_URL in production
 const allowedOrigins = [
   process.env.CLIENT_URL,
+  "https://neighbor-hood-skill-tool-sharing-ex.vercel.app",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
