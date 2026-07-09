@@ -19,12 +19,31 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS config
+// CORS config — allow any localhost port in dev, CLIENT_URL in production
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+];
+
 const corsOptions = {
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  origin: function (origin, callback) {
+    // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    // In development, allow any localhost origin
+    if (process.env.NODE_ENV !== "production" && origin.startsWith("http://localhost")) {
+      return callback(null, true);
+    }
+    // In production, only allow listed origins
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS not allowed for origin: ${origin}`));
+  },
   credentials: true,
   optionsSuccessStatus: 200,
- };
+};
 app.use(cors(corsOptions));
 
 // Routes
