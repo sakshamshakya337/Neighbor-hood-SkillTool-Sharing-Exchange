@@ -46,12 +46,21 @@ const registerUser = async (req, res, next) => {
           email: user.email,
           subject: "Email Verification - NeighborShare",
           message: `Please verify your email by clicking: ${verifyUrl}`,
-          html: `<p>Please verify your email by clicking this link: <a href="${verifyUrl}">${verifyUrl}</a></p>`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #4F46E5;">Welcome to NeighborShare!</h2>
+              <p>Hi ${user.name},</p>
+              <p>Please verify your email address by clicking the button below:</p>
+              <a href="${verifyUrl}" style="display:inline-block;background:#4F46E5;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:16px 0;">Verify Email</a>
+              <p>Or copy this link: <a href="${verifyUrl}">${verifyUrl}</a></p>
+              <p style="color:#888;font-size:12px;">This link expires in 1 hour.</p>
+            </div>
+          `,
         });
 
         res.status(201).json({ message: "User registered. Please check your email to verify your account." });
       } catch (error) {
-        // SMTP not configured — auto-verify so user can still log in
+        // SMTP not configured or failed — auto-verify so user can still log in
         user.isEmailVerified = true;
         user.verificationToken = undefined;
         user.verificationTokenExpiry = undefined;

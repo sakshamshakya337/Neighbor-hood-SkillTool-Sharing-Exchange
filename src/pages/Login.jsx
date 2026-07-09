@@ -6,6 +6,7 @@ import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [needsVerification, setNeedsVerification] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -13,12 +14,17 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setNeedsVerification(false);
     setLoading(true);
     try {
       await login(formData.email, formData.password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to login');
+      const msg = err.response?.data?.message || err.message || 'Failed to login';
+      setError(msg);
+      if (msg.toLowerCase().includes('verify')) {
+        setNeedsVerification(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -37,9 +43,17 @@ const Login = () => {
         </div>
 
         {error && (
-          <div className="bg-error-container text-on-error-container p-4 rounded-xl text-sm flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <p className="font-medium">{error}</p>
+          <div className="bg-error-container text-on-error-container p-4 rounded-xl text-sm flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium">{error}</p>
+              {needsVerification && (
+                <p className="mt-1 text-xs opacity-80">
+                  Please check your inbox and click the verification link.{' '}
+                  <Link to="/register" className="underline font-semibold">Re-register to resend.</Link>
+                </p>
+              )}
+            </div>
           </div>
         )}
 

@@ -9,7 +9,19 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+
+    // Guard: if there's no response (network error, CORS, server down),
+    // skip the refresh logic and reject with a user-friendly error
+    if (!error.response) {
+      return Promise.reject(
+        new Error('Unable to reach the server. Please check your connection.')
+      );
+    }
+
+    // Skip refresh token retry for auth endpoints to avoid infinite loops
+    const isAuthEndpoint = originalRequest.url?.includes('/api/auth/');
+    
+    if (error.response.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
       try {
         const { data } = await axios.post(
@@ -18,18 +30,17 @@ api.interceptors.response.use(
           { withCredentials: true }
         );
         
-        // Ensure the original request uses the new token if you're passing it in headers,
-        // but since we are using cookies, the browser handles it automatically on the next request.
-        // However, if using Bearer, we'd set it here.
         if (data.accessToken) {
           originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-          // Also set the global default
           api.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`;
+          localStorage.setItem('accessToken', data.accessToken);
         }
         
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh token failed (e.g. expired or not present)
+        // Refresh token failed — clear local auth state
+        localStorage.removeItem('accessToken');
+        delete api.defaults.headers.common['Authorization'];
         return Promise.reject(refreshError);
       }
     }

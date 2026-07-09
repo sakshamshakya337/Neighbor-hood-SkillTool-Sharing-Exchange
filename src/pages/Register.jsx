@@ -20,7 +20,7 @@ const Register = () => {
       await register(formData.name, formData.email, formData.password);
       setSuccess('Registration successful! Please check your email to verify your account.');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to register');
+      setError(err.response?.data?.message || err.message || 'Failed to register');
     } finally {
       setLoading(false);
     }
