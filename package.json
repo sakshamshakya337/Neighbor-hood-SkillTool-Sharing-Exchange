@@ -5,13 +5,10 @@
   "main": "server/server.js",
   "type": "commonjs",
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "nodemon server/server.js",
-    "dev:client": "vite",
+    "dev": "concurrently \"nodemon server/server.js\" \"vite\"",
     "build": "vite build",
     "start": "node server/server.js",
-    "lint": "oxlint",
-    "vercel-build": "vite build"
+    "lint": "oxlint"
   },
   "dependencies": {
     "autoprefixer": "^10.5.2",
