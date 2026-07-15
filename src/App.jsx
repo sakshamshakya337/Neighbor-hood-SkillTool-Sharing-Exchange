@@ -13,7 +13,12 @@ import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import BrowseSkills from './pages/BrowseSkills';
-import BrowseTools from './pages/BrowseTools';
+// Overriding BrowseTools with the new ToolsList we built
+import ToolsList from './pages/ToolsList';
+import ToolDetails from './pages/ToolDetails';
+import AddEditTool from './pages/AddEditTool';
+import AddEditSkill from './pages/AddEditSkill';
+import RentalHistory from './pages/RentalHistory';
 
 function App() {
   return (
@@ -29,10 +34,16 @@ function App() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           
           <Route path="/skills" element={<BrowseSkills />} />
-          <Route path="/tools" element={<BrowseTools />} />
+          <Route path="/tools" element={<ToolsList />} />
+          <Route path="/tools/:id" element={<ToolDetails />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/tools/add" element={<AddEditTool />} />
+            <Route path="/tools/edit/:id" element={<AddEditTool />} />
+            <Route path="/skills/add" element={<AddEditSkill />} />
+            <Route path="/skills/edit/:id" element={<AddEditSkill />} />
+            <Route path="/rental-history" element={<RentalHistory />} />
           </Route>
         </Routes>
       </main>

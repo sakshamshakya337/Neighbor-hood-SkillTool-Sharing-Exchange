@@ -61,6 +61,14 @@ app.use(async (req, res, next) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
+// Mount tool and booking routes directly to /api since routes inside have paths like /tool, /booking
+const toolRoutes = require("./routes/toolRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
+const skillRoutes = require("./routes/skillRoutes");
+app.use("/api", toolRoutes);
+app.use("/api", bookingRoutes);
+app.use("/api", skillRoutes);
+
 // Health check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
