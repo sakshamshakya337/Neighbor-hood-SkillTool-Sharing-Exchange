@@ -2,6 +2,7 @@
 
 This is the central repository for the Neighborhood Skill & Tool Sharing platform. The backend is an Express/Node.js application optimized for Vercel's Serverless Functions, and the frontend is a React application built with Vite and TailwindCSS.
 
+[![DeepScan grade](https://deepscan.io/api/teams/30237/projects/32103/branches/1044001/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=30237&pid=32103&bid=1044001)
 ## API Documentation
 
 **Total APIs Integrated: 34** 
