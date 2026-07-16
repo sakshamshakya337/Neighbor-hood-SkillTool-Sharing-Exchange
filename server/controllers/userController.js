@@ -14,6 +14,9 @@ const getUserProfile = async (req, res) => {
       isEmailVerified: user.isEmailVerified,
       isNeighborhoodVerified: user.isNeighborhoodVerified,
       address: user.address,
+      wishlist: user.wishlist,
+      trustScore: user.trustScore,
+      totalReviews: user.totalReviews,
     });
   } else {
     res.status(404).json({ message: "User not found" });
@@ -39,6 +42,9 @@ const updateUserProfile = async (req, res) => {
       isEmailVerified: updatedUser.isEmailVerified,
       isNeighborhoodVerified: updatedUser.isNeighborhoodVerified,
       address: updatedUser.address,
+      wishlist: updatedUser.wishlist,
+      trustScore: updatedUser.trustScore,
+      totalReviews: updatedUser.totalReviews,
     });
   } else {
     res.status(404).json({ message: "User not found" });

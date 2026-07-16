@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { User, Mail, MapPin, Building2, Map, Navigation, ShieldCheck, ShieldAlert, CheckCircle2, AlertCircle, Save } from 'lucide-react';
+import { User, Mail, MapPin, Building2, Map, Navigation, ShieldCheck, ShieldAlert, CheckCircle2, AlertCircle, Save, Star } from 'lucide-react';
 
 const Profile = () => {
   const { user, updateProfileData } = useAuth();
   const [profileData, setProfileData] = useState({ name: '' });
   const [addressData, setAddressData] = useState({ street: '', city: '', state: '', pincode: '' });
+  const [trustScoreData, setTrustScoreData] = useState({ trustScore: 0, totalReviews: 0 });
   
   const [msg, setMsg] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
@@ -15,8 +16,18 @@ const Profile = () => {
     if (user) {
       setProfileData({ name: user.name });
       setAddressData(user.address || { street: '', city: '', state: '', pincode: '' });
+      fetchTrustScore();
     }
   }, [user]);
+
+  const fetchTrustScore = async () => {
+    try {
+      const { data } = await api.get('/api/trust-score');
+      setTrustScoreData({ trustScore: data.trustScore || 0, totalReviews: data.totalReviews || 0 });
+    } catch (err) {
+      console.error('Failed to load trust score', err);
+    }
+  };
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
@@ -79,6 +90,16 @@ const Profile = () => {
             <h2 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-3">
               <User className="text-primary w-5 h-5" /> Personal Info
             </h2>
+            
+            <div className="mb-6 bg-surface-container-low p-4 rounded-xl border border-outline-variant/50 flex flex-col items-center">
+              <div className="text-sm font-medium text-on-surface-variant mb-1">Community Trust Score</div>
+              <div className="text-3xl font-black text-primary font-headline flex items-center gap-2">
+                {trustScoreData.trustScore > 0 ? trustScoreData.trustScore.toFixed(1) : 'New'}
+                <Star className={`w-6 h-6 ${trustScoreData.trustScore > 0 ? 'text-yellow-500 fill-yellow-500' : 'text-outline-variant'}`} />
+              </div>
+              <div className="text-xs text-on-surface-variant mt-1">Based on {trustScoreData.totalReviews} reviews</div>
+            </div>
+
             <form onSubmit={handleProfileSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-on-surface mb-1.5 ml-1">Name</label>

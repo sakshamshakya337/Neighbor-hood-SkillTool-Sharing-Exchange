@@ -1,11 +1,47 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { MapPin } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { MapPin, Heart } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../api/axios';
 
 const ToolCard = ({ tool }) => {
+  const { user, updateProfileData } = useAuth();
+  const navigate = useNavigate();
+
+  const isWishlisted = user?.wishlist?.some(
+    (item) => item === tool._id || item._id === tool._id
+  );
+
+  const handleWishlistToggle = async (e) => {
+    e.preventDefault(); // Prevent triggering other links if nested
+    e.stopPropagation();
+    
+    if (!user) {
+      return navigate('/login');
+    }
+
+    try {
+      const { data } = await api.post('/api/wishlist', { toolId: tool._id });
+      // Update local state based on API response
+      let updatedWishlist = [...(user.wishlist || [])];
+      
+      if (data.message.includes('Added')) {
+        updatedWishlist.push(tool._id);
+      } else {
+        updatedWishlist = updatedWishlist.filter(
+          (id) => id !== tool._id && id._id !== tool._id
+        );
+      }
+      
+      updateProfileData({ wishlist: updatedWishlist });
+    } catch (err) {
+      console.error('Failed to toggle wishlist', err);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="h-48 bg-gray-200">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow relative group">
+      <div className="h-48 bg-gray-200 relative">
         {tool.images && tool.images.length > 0 ? (
           <img src={tool.images[0]} alt={tool.name} className="w-full h-full object-cover" />
         ) : (
@@ -13,6 +49,19 @@ const ToolCard = ({ tool }) => {
             No Image
           </div>
         )}
+        
+        {/* Wishlist Button */}
+        <button
+          onClick={handleWishlistToggle}
+          className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow hover:scale-110 transition-transform z-10"
+          title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart 
+            className={`w-5 h-5 transition-colors ${
+              isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-500 hover:text-red-500'
+            }`} 
+          />
+        </button>
       </div>
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">

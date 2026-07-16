@@ -4,14 +4,20 @@ import { getToolById } from '../api/toolApi';
 import { createBooking, getAvailability } from '../api/bookingApi';
 import AvailabilityCalendar from '../components/booking/AvailabilityCalendar';
 import BookingForm from '../components/booking/BookingForm';
+import ReviewSection from '../components/ReviewSection';
+import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
+import { Heart, MessageSquare, MapPin, ShieldCheck, Info, User as UserIcon, CameraOff } from 'lucide-react';
 
 const ToolDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [tool, setTool] = useState(null);
   const [unavailableDates, setUnavailableDates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -21,6 +27,13 @@ const ToolDetails = () => {
         
         const availabilityData = await getAvailability(id);
         setUnavailableDates(availabilityData);
+        
+        if (user) {
+          const { data } = await api.get('/api/users/profile');
+          if (data.wishlist && data.wishlist.some(wId => wId === id || wId._id === id)) {
+             setIsWishlisted(true);
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch tool details:', error);
       } finally {
@@ -29,13 +42,12 @@ const ToolDetails = () => {
     };
     
     fetchDetails();
-  }, [id]);
+  }, [id, user]);
 
   const handleBookingSubmit = async (bookingData) => {
     setBookingLoading(true);
     try {
-      // Simulate booking process
-      const result = await createBooking(bookingData);
+      await createBooking(bookingData);
       alert('Booking created successfully! Redirecting to rental history...');
       navigate('/rental-history');
     } catch (error) {
@@ -46,53 +58,127 @@ const ToolDetails = () => {
     }
   };
 
+  const toggleWishlist = async () => {
+    if (!user) return navigate('/login');
+    try {
+      const { data } = await api.post('/api/wishlist', { toolId: id });
+      setIsWishlisted(data.message.includes('Added'));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleMessageOwner = async () => {
+    if (!user) return navigate('/login');
+    try {
+      const { data } = await api.post('/api/chat', { userId: tool.owner._id });
+      navigate('/chat', { state: { chatId: data._id } });
+    } catch (err) {
+      console.error('Failed to start chat:', err);
+    }
+  };
+
   if (loading) return <div className="text-center py-20">Loading...</div>;
   if (!tool) return <div className="text-center py-20">Tool not found</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 max-w-7xl">
+      {/* Header Section */}
+      <div className="mb-8">
+        <h1 className="text-4xl lg:text-5xl font-black text-on-surface font-headline mb-4 tracking-tight">{tool.name}</h1>
+        <div className="flex flex-wrap items-center gap-5 text-on-surface-variant font-medium text-sm">
+          <span className="flex items-center gap-1.5 bg-surface-container px-3.5 py-1.5 rounded-full border border-outline-variant/50 text-on-surface font-semibold">
+            {tool.category?.name || 'General'}
+          </span>
+          <span className="flex items-center gap-1.5 hover:text-primary transition-colors">
+            <MapPin className="w-4 h-4 text-primary" />
+            {tool.location?.address || 'Location not specified'}
+          </span>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+              <span className="text-xs font-bold text-primary">{tool.owner?.name?.charAt(0) || 'U'}</span>
+            </div>
+            <span className="font-semibold">Hosted by {tool.owner?.name || 'Unknown'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Image */}
+      <div className="w-full h-[400px] sm:h-[500px] bg-gradient-to-br from-surface-container-low to-surface-container rounded-3xl overflow-hidden relative mb-12 shadow-sm border border-outline-variant/50">
+        {tool.images && tool.images.length > 0 ? (
+          <img src={tool.images[0]} alt={tool.name} className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700 ease-out" />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant/60">
+            <CameraOff className="w-16 h-16 mb-4 opacity-50" />
+            <span className="text-lg font-medium">No Image Available</span>
+          </div>
+        )}
+        <button 
+          onClick={toggleWishlist}
+          className="absolute top-6 right-6 bg-surface/90 backdrop-blur-md p-3 rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all border border-outline-variant/30"
+        >
+          <Heart className={`w-6 h-6 transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-on-surface'}`} />
+        </button>
+      </div>
+
+      {/* Main Content & Booking Form Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
         
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-             <div className="h-96 bg-gray-200">
-              {tool.images && tool.images.length > 0 ? (
-                <img src={tool.images[0]} alt={tool.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  No Image Available
-                </div>
-              )}
-            </div>
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-800">{tool.name}</h1>
-                  <p className="text-gray-500 mt-1">{tool.category?.name || 'General'}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-blue-600">${tool.pricePerDay}<span className="text-sm text-gray-500 font-normal">/day</span></p>
-                </div>
+        {/* Left Column: Details */}
+        <div className="lg:col-span-2 space-y-12">
+          
+          {/* Highlights */}
+          <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-8 justify-between shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                <Info className="w-6 h-6" />
               </div>
-              
-              <h3 className="text-lg font-semibold mb-2">Description</h3>
-              <p className="text-gray-600 mb-6">{tool.description}</p>
-              
-              <h3 className="text-lg font-semibold mb-2">Details</h3>
-              <ul className="text-gray-600 space-y-1">
-                <li><span className="font-medium">Condition:</span> {tool.condition}</li>
-                <li><span className="font-medium">Security Deposit:</span> ${tool.depositAmount}</li>
-                <li><span className="font-medium">Location:</span> {tool.location?.address || 'Not specified'}</li>
-                <li><span className="font-medium">Owner:</span> {tool.owner?.name || 'Unknown'}</li>
-              </ul>
+              <div className="flex flex-col">
+                <span className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">Condition</span>
+                <span className="font-semibold text-lg text-on-surface">{tool.condition}</span>
+              </div>
             </div>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">Security Deposit</span>
+                <span className="font-semibold text-lg text-on-surface">${tool.depositAmount}</span>
+              </div>
+            </div>
+            {tool.owner?._id !== user?._id && (
+              <div className="flex items-center md:justify-end flex-1">
+                <button 
+                  onClick={handleMessageOwner}
+                  className="flex items-center justify-center w-full md:w-auto gap-2 bg-surface-container-high border border-outline-variant text-on-surface px-6 py-3 rounded-xl hover:bg-surface-container transition-all font-bold shadow-sm active:scale-95"
+                >
+                  <MessageSquare className="w-5 h-5 text-primary" />
+                  Message Host
+                </button>
+              </div>
+            )}
           </div>
           
-          <AvailabilityCalendar unavailableDates={unavailableDates} />
+          {/* Description */}
+          <div className="px-2">
+            <h3 className="text-2xl font-black font-headline text-on-surface mb-6">About this tool</h3>
+            <p className="text-on-surface-variant leading-relaxed text-lg whitespace-pre-line">{tool.description}</p>
+          </div>
+
+          <div className="border-t border-outline-variant/50 pt-12 px-2">
+             <AvailabilityCalendar unavailableDates={unavailableDates} />
+          </div>
+
+          <div className="border-t border-outline-variant/50 pt-12 px-2">
+             <ReviewSection toolId={tool._id} />
+          </div>
+
         </div>
         
+        {/* Right Column: Sticky Booking Widget */}
         <div className="lg:col-span-1">
-          <div className="sticky top-4">
+          <div className="sticky top-28">
             <BookingForm 
               tool={tool} 
               onSubmit={handleBookingSubmit} 
@@ -100,6 +186,7 @@ const ToolDetails = () => {
             />
           </div>
         </div>
+        
       </div>
     </div>
   );

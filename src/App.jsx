@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -19,12 +19,17 @@ import ToolDetails from './pages/ToolDetails';
 import AddEditTool from './pages/AddEditTool';
 import AddEditSkill from './pages/AddEditSkill';
 import RentalHistory from './pages/RentalHistory';
+import Chat from './pages/Chat';
+import Wishlist from './pages/Wishlist';
 
 function App() {
+  const location = useLocation();
+  const isChatPage = location.pathname.startsWith('/chat');
+
   return (
     <div className="min-h-screen flex flex-col font-body bg-surface text-on-surface">
       <Navbar />
-      <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden">
+      <main className="flex-1 w-full flex flex-col">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -44,10 +49,12 @@ function App() {
             <Route path="/skills/add" element={<AddEditSkill />} />
             <Route path="/skills/edit/:id" element={<AddEditSkill />} />
             <Route path="/rental-history" element={<RentalHistory />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/wishlist" element={<Wishlist />} />
           </Route>
         </Routes>
       </main>
-      <Footer />
+      {!isChatPage && <Footer />}
     </div>
   );
 }
