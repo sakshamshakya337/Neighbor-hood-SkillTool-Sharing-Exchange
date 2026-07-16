@@ -14,7 +14,16 @@ const initSocket = (server) => {
   io = new Server(server, {
     pingTimeout: 60000,
     cors: {
-      origin: allowedOrigins,
+      origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (process.env.NODE_ENV !== "production" && origin.startsWith("http://localhost")) {
+          return callback(null, true);
+        }
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error(`Socket CORS not allowed for origin: ${origin}`));
+      },
       credentials: true,
     },
   });
@@ -49,11 +58,14 @@ const initSocket = (server) => {
       }
 
       chat.participants.forEach((user) => {
+        const participantId = user._id?.toString?.() || user.toString();
+        const senderId = newMessageReceived.senderId?._id?.toString?.() || newMessageReceived.senderId?.toString?.();
+
         // Don't send the message back to the sender
-        if (user._id === newMessageReceived.senderId._id) return;
+        if (participantId === senderId) return;
 
         // Emit to the specific user's personal room
-        socket.in(user._id).emit("message received", newMessageReceived);
+        socket.in(participantId).emit("message received", newMessageReceived);
       });
     });
 

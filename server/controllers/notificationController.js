@@ -1,4 +1,5 @@
 const Notification = require("../models/Notification");
+const mongoose = require("mongoose");
 
 // GET /notifications
 const getNotifications = async (req, res) => {
@@ -17,7 +18,16 @@ const markAsRead = async (req, res) => {
   try {
     const { notificationIds } = req.body; // Array of IDs to mark as read
 
+    if (notificationIds !== undefined && !Array.isArray(notificationIds)) {
+      return res.status(400).json({ message: "notificationIds must be an array" });
+    }
+
     if (notificationIds && notificationIds.length > 0) {
+      const invalidId = notificationIds.find((id) => !mongoose.Types.ObjectId.isValid(id));
+      if (invalidId) {
+        return res.status(400).json({ message: "Invalid notification id" });
+      }
+
       await Notification.updateMany(
         { _id: { $in: notificationIds }, recipient: req.user._id },
         { $set: { isRead: true } }

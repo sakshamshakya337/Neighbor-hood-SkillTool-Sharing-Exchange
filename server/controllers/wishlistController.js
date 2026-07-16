@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Tool = require("../models/Tool");
+const mongoose = require("mongoose");
 
 // POST /wishlist
 // Toggles a tool in the user's wishlist
@@ -7,6 +8,10 @@ const toggleWishlist = async (req, res) => {
   const { toolId } = req.body;
 
   try {
+    if (!toolId || !mongoose.Types.ObjectId.isValid(toolId)) {
+      return res.status(400).json({ message: "Valid toolId is required" });
+    }
+
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -23,12 +28,12 @@ const toggleWishlist = async (req, res) => {
       // Remove from wishlist
       user.wishlist = user.wishlist.filter((id) => id.toString() !== toolId);
       await user.save();
-      res.json({ message: "Removed from wishlist", wishlist: user.wishlist });
+      res.json({ message: "Removed from wishlist", action: "removed", wishlist: user.wishlist });
     } else {
       // Add to wishlist
       user.wishlist.push(toolId);
       await user.save();
-      res.json({ message: "Added to wishlist", wishlist: user.wishlist });
+      res.json({ message: "Added to wishlist", action: "added", wishlist: user.wishlist });
     }
   } catch (error) {
     res.status(400).json({ message: error.message });

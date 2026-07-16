@@ -33,7 +33,7 @@ const Chat = () => {
     }
 
     return () => {
-      socket.current.disconnect();
+      socket.current?.disconnect();
     };
   }, [user]);
 
@@ -83,17 +83,22 @@ const Chat = () => {
 
   useEffect(() => {
     const messageListener = (newMessageReceived) => {
-      if (!selectedChat || selectedChat._id !== newMessageReceived.chatId._id) {
+      const receivedChatId =
+        typeof newMessageReceived.chatId === 'string'
+          ? newMessageReceived.chatId
+          : newMessageReceived.chatId?._id;
+
+      if (!selectedChat || selectedChat._id !== receivedChatId) {
         // Notification logic could go here
       } else {
         setMessages((prev) => [...prev, newMessageReceived]);
       }
     };
 
-    socket.current.on("message received", messageListener);
+    socket.current?.on("message received", messageListener);
 
     return () => {
-      socket.current.off("message received", messageListener);
+      socket.current?.off("message received", messageListener);
     };
   }, [selectedChat]);
 
@@ -104,8 +109,8 @@ const Chat = () => {
   const sendMessage = async (e) => {
     if (e.key === "Enter" || e.type === "click") {
       e.preventDefault();
-      if (!newMessage.trim()) return;
-      socket.current.emit("stop typing", selectedChat._id);
+      if (!selectedChat || !newMessage.trim()) return;
+      socket.current?.emit("stop typing", selectedChat._id);
       
       try {
         const { data } = await api.post("/api/chat/message", {
@@ -114,7 +119,7 @@ const Chat = () => {
         });
         
         setNewMessage("");
-        socket.current.emit("new message", data);
+        socket.current?.emit("new message", data);
         setMessages((prev) => [...prev, data]);
         fetchChats(); // Update last message in chat list
       } catch (error) {
@@ -126,7 +131,7 @@ const Chat = () => {
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
 
-    if (!socketConnected) return;
+    if (!socketConnected || !selectedChat) return;
 
     if (!typing) {
       setTyping(true);
@@ -226,7 +231,7 @@ const Chat = () => {
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30">
-                {messages.map((m, i) => {
+                {messages.map((m) => {
                   const isMine = m.senderId._id === user._id;
                   return (
                     <div key={m._id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>

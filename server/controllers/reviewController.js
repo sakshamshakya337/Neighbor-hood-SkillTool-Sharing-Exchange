@@ -2,15 +2,56 @@ const Review = require("../models/Review");
 const Tool = require("../models/Tool");
 const User = require("../models/User");
 const { createNotification } = require("./notificationController");
+const mongoose = require("mongoose");
+
+const parseRating = (rating) => {
+  const numericRating = Number(rating);
+  if (!Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5) {
+    return null;
+  }
+  return numericRating;
+};
+
+const updateTrustScore = async (userId) => {
+  const userReviews = await Review.find({ reviewedUser: userId });
+  const totalReviews = userReviews.length;
+  const trustScore =
+    totalReviews > 0
+      ? userReviews.reduce((acc, item) => item.rating + acc, 0) / totalReviews
+      : 0;
+
+  await User.findByIdAndUpdate(userId, {
+    trustScore,
+    totalReviews,
+  });
+};
 
 // POST /review
 const addReview = async (req, res) => {
   const { toolId, rating, comment } = req.body;
 
   try {
+    if (!toolId || !mongoose.Types.ObjectId.isValid(toolId)) {
+      return res.status(400).json({ message: "Valid toolId is required" });
+    }
+
+    const numericRating = parseRating(rating);
+    if (!numericRating) {
+      return res.status(400).json({ message: "Rating must be an integer between 1 and 5" });
+    }
+
+    const trimmedComment = typeof comment === "string" ? comment.trim() : "";
+    if (!trimmedComment) {
+      return res.status(400).json({ message: "Comment is required" });
+    }
+
     const tool = await Tool.findById(toolId);
     if (!tool) {
       return res.status(404).json({ message: "Tool not found" });
+    }
+
+    if (tool.owner.toString() === req.user._id.toString()) {
+      return res.status(400).json({ message: "You cannot review your own tool" });
     }
 
     // Check if user already reviewed this tool
@@ -27,31 +68,20 @@ const addReview = async (req, res) => {
       reviewer: req.user._id,
       reviewedUser: tool.owner,
       tool: toolId,
-      rating: Number(rating),
-      comment,
+      rating: numericRating,
+      comment: trimmedComment,
     });
 
-    // Update user's trust score
-    const userReviews = await Review.find({ reviewedUser: tool.owner });
-    const totalReviews = userReviews.length;
-    const avgRating =
-      userReviews.reduce((acc, item) => item.rating + acc, 0) / totalReviews;
-
-    await User.findByIdAndUpdate(tool.owner, {
-      trustScore: avgRating,
-      totalReviews,
-    });
+    await updateTrustScore(tool.owner);
     
     // Create notification for the tool owner
-    if (tool.owner.toString() !== req.user._id.toString()) {
-      await createNotification(
-        tool.owner,
-        req.user._id,
-        "review",
-        `Someone left a ${rating}-star review on your tool "${tool.name}".`,
-        review._id
-      );
-    }
+    await createNotification(
+      tool.owner,
+      req.user._id,
+      "review",
+      `Someone left a ${numericRating}-star review on your tool "${tool.name}".`,
+      review._id
+    );
 
     res.status(201).json(review);
   } catch (error) {
@@ -62,6 +92,10 @@ const addReview = async (req, res) => {
 // GET /review/:toolId
 const getToolReviews = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.toolId)) {
+      return res.status(400).json({ message: "Invalid tool id" });
+    }
+
     const reviews = await Review.find({ tool: req.params.toolId }).populate(
       "reviewer",
       "name"
@@ -77,6 +111,10 @@ const updateReview = async (req, res) => {
   const { rating, comment } = req.body;
 
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid review id" });
+    }
+
     const review = await Review.findById(req.params.id);
 
     if (!review) {
@@ -87,20 +125,25 @@ const updateReview = async (req, res) => {
       return res.status(401).json({ message: "Not authorized" });
     }
 
-    review.rating = rating || review.rating;
-    review.comment = comment || review.comment;
+    if (rating !== undefined) {
+      const numericRating = parseRating(rating);
+      if (!numericRating) {
+        return res.status(400).json({ message: "Rating must be an integer between 1 and 5" });
+      }
+      review.rating = numericRating;
+    }
+
+    if (comment !== undefined) {
+      const trimmedComment = typeof comment === "string" ? comment.trim() : "";
+      if (!trimmedComment) {
+        return res.status(400).json({ message: "Comment is required" });
+      }
+      review.comment = trimmedComment;
+    }
+
     await review.save();
 
-    // Update user's trust score
-    const userReviews = await Review.find({ reviewedUser: review.reviewedUser });
-    const totalReviews = userReviews.length;
-    const avgRating =
-      userReviews.reduce((acc, item) => item.rating + acc, 0) / totalReviews;
-
-    await User.findByIdAndUpdate(review.reviewedUser, {
-      trustScore: avgRating,
-      totalReviews,
-    });
+    await updateTrustScore(review.reviewedUser);
 
     res.json(review);
   } catch (error) {
@@ -111,6 +154,10 @@ const updateReview = async (req, res) => {
 // DELETE /review/:id
 const deleteReview = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid review id" });
+    }
+
     const review = await Review.findById(req.params.id);
 
     if (!review) {
@@ -125,16 +172,7 @@ const deleteReview = async (req, res) => {
     
     await Review.findByIdAndDelete(req.params.id);
 
-    // Update user's trust score
-    const userReviews = await Review.find({ reviewedUser: reviewedUserId });
-    const totalReviews = userReviews.length;
-    const avgRating = totalReviews > 0 ?
-      userReviews.reduce((acc, item) => item.rating + acc, 0) / totalReviews : 0;
-
-    await User.findByIdAndUpdate(reviewedUserId, {
-      trustScore: avgRating,
-      totalReviews,
-    });
+    await updateTrustScore(reviewedUserId);
 
     res.json({ message: "Review removed" });
   } catch (error) {

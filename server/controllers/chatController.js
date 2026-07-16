@@ -2,18 +2,31 @@ const Chat = require("../models/Chat");
 const Message = require("../models/Message");
 const User = require("../models/User");
 const { createNotification } = require("./notificationController");
+const mongoose = require("mongoose");
+
+const isParticipant = (chat, userId) =>
+  chat.participants.some((participantId) => participantId.toString() === userId.toString());
 
 // POST /chat
 const accessChat = async (req, res) => {
   const { userId } = req.body;
 
-  if (!userId) {
-    return res.status(400).json({ message: "UserId param not sent with request" });
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Valid userId is required" });
+  }
+
+  if (userId.toString() === req.user._id.toString()) {
+    return res.status(400).json({ message: "Cannot create a chat with yourself" });
   }
 
   try {
+    const otherUser = await User.findById(userId).select("_id");
+    if (!otherUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     let isChat = await Chat.find({
-      participants: { $all: [req.user._id, userId] },
+      participants: { $all: [req.user._id, userId], $size: 2 },
     })
       .populate("participants", "-passwordHash")
       .populate("lastMessage");
@@ -66,6 +79,19 @@ const fetchChats = async (req, res) => {
 // Get all messages for a specific chat
 const getMessages = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid chat id" });
+    }
+
+    const chat = await Chat.findById(req.params.id);
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    if (!isParticipant(chat, req.user._id)) {
+      return res.status(403).json({ message: "Not authorized to view this chat" });
+    }
+
     const messages = await Message.find({ chatId: req.params.id })
       .populate("senderId", "name email")
       .populate("chatId");
@@ -79,17 +105,26 @@ const getMessages = async (req, res) => {
 const sendMessage = async (req, res) => {
   const { content, chatId } = req.body;
 
-  if (!content || !chatId) {
+  if (!content || !content.trim() || !chatId || !mongoose.Types.ObjectId.isValid(chatId)) {
     return res.status(400).json({ message: "Invalid data passed into request" });
   }
 
-  const newMessage = {
-    senderId: req.user._id,
-    text: content,
-    chatId: chatId,
-  };
-
   try {
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    if (!isParticipant(chat, req.user._id)) {
+      return res.status(403).json({ message: "Not authorized to send messages in this chat" });
+    }
+
+    const newMessage = {
+      senderId: req.user._id,
+      text: content.trim(),
+      chatId,
+    };
+
     let message = await Message.create(newMessage);
     message = await message.populate("senderId", "name");
     message = await message.populate("chatId");
@@ -98,21 +133,18 @@ const sendMessage = async (req, res) => {
       select: "name email",
     });
 
-    await Chat.findByIdAndUpdate(req.body.chatId, { lastMessage: message });
+    await Chat.findByIdAndUpdate(chatId, { lastMessage: message._id });
     
     // Create notification for other participants
-    const chat = await Chat.findById(chatId);
-    if (chat) {
-      for (const participantId of chat.participants) {
-        if (participantId.toString() !== req.user._id.toString()) {
-          await createNotification(
-            participantId,
-            req.user._id,
-            "message",
-            "You have a new message.",
-            chatId
-          );
-        }
+    for (const participantId of chat.participants) {
+      if (participantId.toString() !== req.user._id.toString()) {
+        await createNotification(
+          participantId,
+          req.user._id,
+          "message",
+          "You have a new message.",
+          chatId
+        );
       }
     }
 
@@ -125,12 +157,16 @@ const sendMessage = async (req, res) => {
 // DELETE /chat/:id
 const deleteChat = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid chat id" });
+    }
+
     const chat = await Chat.findById(req.params.id);
     if (!chat) {
       return res.status(404).json({ message: "Chat not found" });
     }
     // Only allow if user is part of the chat
-    if (!chat.participants.includes(req.user._id)) {
+    if (!isParticipant(chat, req.user._id)) {
       return res.status(403).json({ message: "Not authorized to delete this chat" });
     }
 

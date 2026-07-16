@@ -32,4 +32,6 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+reviewSchema.index({ reviewer: 1, tool: 1 }, { unique: true });
+
 module.exports = mongoose.model("Review", reviewSchema);

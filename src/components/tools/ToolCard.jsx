@@ -22,18 +22,7 @@ const ToolCard = ({ tool }) => {
 
     try {
       const { data } = await api.post('/api/wishlist', { toolId: tool._id });
-      // Update local state based on API response
-      let updatedWishlist = [...(user.wishlist || [])];
-      
-      if (data.message.includes('Added')) {
-        updatedWishlist.push(tool._id);
-      } else {
-        updatedWishlist = updatedWishlist.filter(
-          (id) => id !== tool._id && id._id !== tool._id
-        );
-      }
-      
-      updateProfileData({ wishlist: updatedWishlist });
+      updateProfileData({ wishlist: data.wishlist || [] });
     } catch (err) {
       console.error('Failed to toggle wishlist', err);
     }
