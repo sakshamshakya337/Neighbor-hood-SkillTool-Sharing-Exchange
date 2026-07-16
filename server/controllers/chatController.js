@@ -7,6 +7,17 @@ const mongoose = require("mongoose");
 const isParticipant = (chat, userId) =>
   chat.participants.some((participantId) => participantId.toString() === userId.toString());
 
+const getChatGroupKey = (chat) => {
+  if (chat.directChatKey) {
+    return chat.directChatKey;
+  }
+
+  return chat.participants
+    .map((participant) => participant._id?.toString() || participant.toString())
+    .sort()
+    .join(":");
+};
+
 // POST /chat
 const accessChat = async (req, res) => {
   const { userId } = req.body;
@@ -25,11 +36,17 @@ const accessChat = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const directChatKey = Chat.getDirectChatKey([req.user._id, userId]);
+
     let isChat = await Chat.find({
-      participants: { $all: [req.user._id, userId], $size: 2 },
+      $or: [
+        { directChatKey },
+        { participants: { $all: [req.user._id, userId], $size: 2 } },
+      ],
     })
       .populate("participants", "-passwordHash")
-      .populate("lastMessage");
+      .populate("lastMessage")
+      .sort({ updatedAt: -1 });
 
     isChat = await Message.populate(isChat, {
       path: "lastMessage.senderId",
@@ -41,9 +58,19 @@ const accessChat = async (req, res) => {
     } else {
       const chatData = {
         participants: [req.user._id, userId],
+        directChatKey,
       };
 
-      const createdChat = await Chat.create(chatData);
+      let createdChat;
+      try {
+        createdChat = await Chat.create(chatData);
+      } catch (error) {
+        if (error.code !== 11000) {
+          throw error;
+        }
+        createdChat = await Chat.findOne({ directChatKey });
+      }
+
       const fullChat = await Chat.findOne({ _id: createdChat._id }).populate(
         "participants",
         "-passwordHash"
@@ -69,7 +96,19 @@ const fetchChats = async (req, res) => {
       select: "name email",
     });
 
-    res.status(200).send(results);
+    const dedupedChats = [];
+    const seenChatKeys = new Set();
+
+    for (const chat of results) {
+      const chatKey = getChatGroupKey(chat);
+      if (seenChatKeys.has(chatKey)) {
+        continue;
+      }
+      seenChatKeys.add(chatKey);
+      dedupedChats.push(chat);
+    }
+
+    res.status(200).send(dedupedChats);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -170,8 +209,18 @@ const deleteChat = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to delete this chat" });
     }
 
-    await Message.deleteMany({ chatId: req.params.id });
-    await Chat.findByIdAndDelete(req.params.id);
+    const participantIds = chat.participants.map((participantId) => participantId.toString());
+    const directChatKey = Chat.getDirectChatKey(participantIds);
+    const duplicateChats = await Chat.find({
+      $or: [
+        { directChatKey },
+        { participants: { $all: participantIds, $size: 2 } },
+      ],
+    }).select("_id");
+    const chatIdsToDelete = duplicateChats.map((duplicateChat) => duplicateChat._id);
+
+    await Message.deleteMany({ chatId: { $in: chatIdsToDelete } });
+    await Chat.deleteMany({ _id: { $in: chatIdsToDelete } });
     res.json({ message: "Chat deleted" });
   } catch (error) {
     res.status(400).json({ message: error.message });
