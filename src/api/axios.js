@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-// In development: use localhost:5000
+// In development: use localhost:5001
 // In production (Vercel): use same-domain relative URLs (empty string)
 const BASE_URL = import.meta.env.DEV
-  ? (import.meta.env.VITE_API_URL || 'http://localhost:5000')
+  ? (import.meta.env.VITE_API_URL || 'http://localhost:5001')
   : '';
 
 const api = axios.create({
