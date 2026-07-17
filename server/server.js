@@ -1,6 +1,7 @@
 // Default DNS resolution is used to avoid SRV lookup failures on certain networks
 
 const app = require("./app");
+const { initSocket } = require("./socket");
 
 const PORT = process.env.PORT || 5001;
 
@@ -10,6 +11,8 @@ if (require.main === module) {
   const server = app.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   });
+
+  initSocket(server);
 
   // Handle unhandled promise rejections
   process.on("unhandledRejection", (err) => {

@@ -19,17 +19,19 @@ import AddEditTool from "./pages/AddEditTool";
 import AddEditSkill from "./pages/AddEditSkill";
 import RentalHistory from "./pages/RentalHistory";
 import AdminDashboard from "./pages/AdminDashboard";
+import Chat from "./pages/Chat";
+import Wishlist from "./pages/Wishlist";
 
 function App() {
   const location = useLocation();
-
   const isAdminPage = location.pathname.startsWith("/admin");
+  const isChatPage = location.pathname.startsWith("/chat");
 
   return (
     <div className="min-h-screen flex flex-col font-body bg-surface text-on-surface">
       {!isAdminPage && <Navbar />}
 
-      <main className={`flex-1 ${isAdminPage ? "" : "w-full max-w-[100vw] overflow-x-hidden"}`}>
+      <main className={`flex-1 ${isAdminPage ? "" : "w-full max-w-[100vw] overflow-x-hidden"} flex flex-col`}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
@@ -58,11 +60,14 @@ function App() {
 
             {/* Admin */}
             <Route path="/admin" element={<AdminDashboard />} />
+
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/wishlist" element={<Wishlist />} />
           </Route>
         </Routes>
       </main>
 
-      {!isAdminPage && <Footer />}
+      {!isAdminPage && !isChatPage && <Footer />}
     </div>
   );
 }

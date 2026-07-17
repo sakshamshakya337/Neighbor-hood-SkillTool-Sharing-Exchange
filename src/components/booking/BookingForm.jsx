@@ -33,65 +33,66 @@ const BookingForm = ({ tool, onSubmit, isSubmitting }) => {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-      <h3 className="text-xl font-bold mb-4 text-gray-800">Book this Tool</h3>
+    <form onSubmit={handleSubmit} className="bg-surface p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-outline-variant">
+      <div className="mb-6">
+        <span className="text-3xl font-black font-headline text-on-surface">${tool.pricePerDay}</span>
+        <span className="text-on-surface-variant font-medium"> / day</span>
+      </div>
       
       <div className="space-y-4 mb-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-          <div className="relative">
+        <div className="bg-surface-container-low rounded-xl border border-outline-variant p-1">
+          <div className="relative border-b border-outline-variant p-2">
+            <label className="block text-xs font-bold text-on-surface uppercase tracking-wider mb-1">Check-in</label>
             <input
               type="date"
               required
               min={today}
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-on-surface font-medium cursor-pointer"
             />
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           </div>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-          <div className="relative">
+          
+          <div className="relative p-2">
+            <label className="block text-xs font-bold text-on-surface uppercase tracking-wider mb-1">Check-out</label>
             <input
               type="date"
               required
               min={startDate || today}
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-on-surface font-medium cursor-pointer"
             />
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           </div>
         </div>
       </div>
 
+      <button
+        type="submit"
+        disabled={!startDate || !endDate || isSubmitting}
+        className="w-full bg-primary text-on-primary font-bold py-3.5 rounded-xl hover:brightness-110 active:scale-[0.98] transition-all disabled:bg-surface-container-high disabled:text-on-surface-variant disabled:cursor-not-allowed text-lg shadow-md"
+      >
+        {isSubmitting ? 'Processing...' : 'Reserve'}
+      </button>
+
+      <p className="text-center text-on-surface-variant text-sm mt-4 font-medium">You won't be charged yet</p>
+
       {totalPrice > 0 && (
-        <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-          <div className="flex justify-between mb-2 text-sm text-gray-600">
-            <span>${tool.pricePerDay} x {totalPrice / tool.pricePerDay} days</span>
+        <div className="mt-6 space-y-3">
+          <div className="flex justify-between text-on-surface">
+            <span className="underline decoration-outline-variant underline-offset-4">${tool.pricePerDay} x {totalPrice / tool.pricePerDay} days</span>
             <span>${totalPrice}</span>
           </div>
-          <div className="flex justify-between mb-2 text-sm text-gray-600">
-            <span>Security Deposit (Refundable)</span>
+          <div className="flex justify-between text-on-surface">
+            <span className="underline decoration-outline-variant underline-offset-4">Security Deposit</span>
             <span>${tool.depositAmount}</span>
           </div>
-          <div className="border-t pt-2 mt-2 flex justify-between font-bold text-gray-800">
-            <span>Total to pay now</span>
+          <div className="border-t border-outline-variant pt-4 mt-4 flex justify-between font-black text-lg text-on-surface">
+            <span>Total</span>
             <span>${totalPrice + tool.depositAmount}</span>
           </div>
         </div>
       )}
-
-      <button
-        type="submit"
-        disabled={!startDate || !endDate || isSubmitting}
-        className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-      >
-        {isSubmitting ? 'Processing...' : 'Proceed to Payment'}
-      </button>
     </form>
   );
 };

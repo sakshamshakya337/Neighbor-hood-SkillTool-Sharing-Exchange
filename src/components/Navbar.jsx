@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Search } from 'lucide-react';
+import { Search, Heart, MessageSquare } from 'lucide-react';
 import Logo from './Logo';
+import NotificationsDropdown from './NotificationsDropdown';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -45,16 +46,29 @@ const Navbar = () => {
           <Search className="absolute left-3 top-2.5 text-on-surface-variant w-4 h-4" />
         </div>
         {user ? (
-          <>
-            <Link to="/dashboard" className="text-on-surface-variant font-medium hover:bg-surface-container-low px-4 py-2 rounded transition-all">Dashboard</Link>
-            <Link to="/profile" className="text-on-surface-variant font-medium hover:bg-surface-container-low px-4 py-2 rounded transition-all">Profile</Link>
-            <button 
-              onClick={handleLogout} 
-              className="bg-primary text-on-primary font-medium px-6 py-2 rounded-lg hover:brightness-110 shadow-sm transition-all active:scale-95 duration-150 ease-in-out"
-            >
-              Logout
-            </button>
-          </>
+          <div className="flex items-center gap-3 md:gap-5">
+            {/* Quick Actions */}
+            <div className="flex items-center gap-2 pr-2">
+              <Link to="/wishlist" className="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-full transition-all duration-200" title="Wishlist">
+                <Heart className="w-5 h-5" />
+              </Link>
+              <Link to="/chat" className="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-full transition-all duration-200" title="Messages">
+                <MessageSquare className="w-5 h-5" />
+              </Link>
+              <NotificationsDropdown />
+            </div>
+            
+            <div className="hidden md:flex items-center gap-2 border-l border-outline-variant/50 pl-5">
+              <Link to="/dashboard" className="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Dashboard</Link>
+              <Link to="/profile" className="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors mx-2">Profile</Link>
+              <button 
+                onClick={handleLogout} 
+                className="ml-2 bg-primary/10 text-primary font-bold px-5 py-2 rounded-full hover:bg-primary hover:text-on-primary transition-all duration-200 active:scale-95 text-sm"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
         ) : (
           <>
             <Link to="/login" className="text-on-surface-variant font-medium hover:bg-surface-container-low px-4 py-2 rounded transition-all active:scale-95 duration-150 ease-in-out">

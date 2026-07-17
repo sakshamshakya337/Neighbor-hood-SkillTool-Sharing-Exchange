@@ -8,7 +8,7 @@ if (!cached) {
   cached = global.mongooseConn = { conn: null, promise: null };
 }
 
-const connectDB = async () => {
+const connectDB = async (retries = 3) => {
   // Return cached connection if already connected
   if (cached.conn) {
     return cached.conn;
@@ -21,15 +21,24 @@ const connectDB = async () => {
   // Reuse in-progress connection promise
   if (!cached.promise) {
     console.log("Mongoose attempting to connect to database...");
-    cached.promise = mongoose
-      .connect(process.env.MONGO_URI, {
-        serverSelectionTimeoutMS: 10000, // 10s timeout
-        socketTimeoutMS: 45000,
-      })
-      .then((m) => {
+    
+    const connectWithRetry = async (attemptsLeft) => {
+      try {
+        const m = await mongoose.connect(process.env.MONGO_URI, {
+          serverSelectionTimeoutMS: 10000,
+          socketTimeoutMS: 45000,
+        });
         console.log(`MongoDB Connected: ${m.connection.host}`);
         return m;
-      });
+      } catch (err) {
+        if (attemptsLeft === 1) throw err;
+        console.log(`MongoDB connection failed. Retrying... (${attemptsLeft - 1} attempts left)`);
+        await new Promise(res => setTimeout(res, 1000));
+        return connectWithRetry(attemptsLeft - 1);
+      }
+    };
+
+    cached.promise = connectWithRetry(retries);
   }
 
   try {

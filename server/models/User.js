@@ -53,6 +53,20 @@ const userSchema = new mongoose.Schema(
       lat: Number,
       lng: Number,
     },
+    trustScore: {
+      type: Number,
+      default: 0,
+    },
+    totalReviews: {
+      type: Number,
+      default: 0,
+    },
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Tool",
+      },
+    ],
   },
   {
     timestamps: true,
