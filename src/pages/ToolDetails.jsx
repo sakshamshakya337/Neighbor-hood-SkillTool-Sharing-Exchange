@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getToolById } from '../api/toolApi';
 import { createBooking, getAvailability } from '../api/bookingApi';
+import { createPaymentOrder, verifyPaymentStatus } from '../api/paymentApi';
+import { loadRazorpay } from '../utils/loadRazorpay';
 import AvailabilityCalendar from '../components/booking/AvailabilityCalendar';
 import BookingForm from '../components/booking/BookingForm';
 import ReviewSection from '../components/ReviewSection';
@@ -45,14 +47,91 @@ const ToolDetails = () => {
   }, [id, user]);
 
   const handleBookingSubmit = async (bookingData) => {
+    if (!user) {
+      alert("Please login to book this tool");
+      navigate('/login');
+      return;
+    }
+    
+    if (user.isBlocked) {
+      alert("Your account is restricted due to multiple reports. You cannot make new bookings.");
+      return;
+    }
+    
     setBookingLoading(true);
     try {
-      await createBooking(bookingData);
-      alert('Booking created successfully! Redirecting to rental history...');
-      navigate('/rental-history');
+      // 1. Create booking (Pending)
+      const bookingRes = await createBooking(bookingData);
+      
+      // 2. Create Razorpay Payment Order
+      const totalAmount = bookingData.totalPrice + (tool.depositAmount || 0);
+      const paymentOrderData = {
+        amount: totalAmount,
+        bookingId: bookingRes._id,
+        userId: user._id
+      };
+      const paymentOrderRes = await createPaymentOrder(paymentOrderData);
+      
+      if (!paymentOrderRes.success) {
+        throw new Error(paymentOrderRes.message || "Could not create payment order");
+      }
+
+      // 3. Load Razorpay script
+      const res = await loadRazorpay();
+      if (!res) {
+        alert("Razorpay SDK failed to load. Are you online?");
+        setBookingLoading(false);
+        return;
+      }
+
+      // 4. Initialize Razorpay Modal
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: paymentOrderRes.order.amount,
+        currency: paymentOrderRes.order.currency,
+        name: "Neighbor-hood SkillTool Exchange",
+        description: `Booking for ${tool.name}`,
+        order_id: paymentOrderRes.order.id,
+        handler: async function (response) {
+          try {
+            // 5. Verify payment on success
+            const verifyRes = await verifyPaymentStatus({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+
+            if (verifyRes.success) {
+              alert('Payment successful and booking confirmed!');
+              navigate('/rental-history');
+            } else {
+              alert('Payment verification failed!');
+            }
+          } catch (err) {
+            console.error("Verification error:", err);
+            alert('Payment verification error!');
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+          contact: user.phone || ""
+        },
+        theme: {
+          color: "#4f46e5"
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+      
+      paymentObject.on('payment.failed', function (response){
+        alert(`Payment failed: ${response.error.description}`);
+      });
+      
     } catch (error) {
-      console.error('Booking failed:', error);
-      alert('Failed to create booking.');
+      console.error('Booking/Payment failed:', error);
+      alert('Failed to process booking.');
     } finally {
       setBookingLoading(false);
     }

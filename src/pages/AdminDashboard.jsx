@@ -9,6 +9,7 @@ import UsersTable from "../components/admin/UsersTable";
 import ToolsTable from "../components/admin/ToolsTable";
 import SkillsTable from "../components/admin/SkillsTable";
 import PaymentsTable from "../components/admin/PaymentsTable";
+import BookingsTable from "../components/admin/BookingsTable";
 import ReportsTable from "../components/admin/ReportsTable";
 import SettingsForm from "../components/admin/SettingsForm";
 import Chat from "./Chat";
@@ -102,6 +103,12 @@ export default function AdminDashboard() {
         {activeTab === "Reports" && (
           <section id="Reports">
             <ReportsTable />
+          </section>
+        )}
+
+        {activeTab === "Bookings" && (
+          <section id="Bookings">
+            <BookingsTable />
           </section>
         )}
 

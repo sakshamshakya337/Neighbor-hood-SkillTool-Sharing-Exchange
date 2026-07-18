@@ -42,6 +42,15 @@ const bookingSchema = new mongoose.Schema(
       enum: ["Pending", "Confirmed", "Active", "Completed", "Cancelled"],
       default: "Pending",
     },
+    returnStatus: {
+      type: String,
+      enum: ["Pending", "Returned", "Late", "Not Returned"],
+      default: "Pending",
+    },
+    lateFees: {
+      type: Number,
+      default: 0,
+    },
     paymentId: {
       type: String, // ID from payment gateway (if applicable)
     },

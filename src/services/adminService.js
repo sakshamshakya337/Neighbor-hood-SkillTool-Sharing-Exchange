@@ -12,6 +12,10 @@ export const getTools = async () => {
   return await api.get("/api/admin/tools");
 };
 
+export const getAllBookings = async () => {
+  return await api.get("/api/admin/bookings");
+};
+
 export const blockUser = async (userId) => {
   return await api.put("/api/admin/block-user", { userId });
 };

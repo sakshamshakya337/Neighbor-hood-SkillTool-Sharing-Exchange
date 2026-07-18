@@ -52,6 +52,10 @@ const AddEditSkill = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (user && user.isBlocked) {
+      alert("Your account is restricted. You cannot list new skills.");
+      return;
+    }
     setSubmitting(true);
     
     try {

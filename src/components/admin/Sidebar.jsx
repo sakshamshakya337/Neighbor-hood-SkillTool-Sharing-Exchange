@@ -34,6 +34,10 @@ const menus = [
     icon: Flag,
   },
   {
+    title: "Bookings",
+    icon: BookOpen, // or another icon like Calendar, but BookOpen is already imported
+  },
+  {
     title: "Payments",
     icon: CreditCard,
   },

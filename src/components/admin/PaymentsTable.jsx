@@ -52,6 +52,7 @@ export default function PaymentsTable() {
           <thead className="bg-slate-900 text-white">
             <tr>
               <th className="p-4 text-left">User</th>
+              <th className="text-left">Phone Number</th>
               <th className="text-left">Amount</th>
               <th className="text-left">Order ID</th>
               <th className="text-left">Status</th>
@@ -83,6 +84,7 @@ export default function PaymentsTable() {
                       <span className="font-medium">{payment.user?.name || "Unknown User"}</span>
                     </div>
                   </td>
+                  <td className="text-sm text-slate-600">{payment.user?.phone || "N/A"}</td>
                   <td className="font-medium text-slate-900">₹{payment.amount}</td>
                   <td className="text-sm font-mono text-slate-600">{payment.razorpayOrderId}</td>
                   <td>

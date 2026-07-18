@@ -37,6 +37,11 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
+    reportsCount: {
+      type: Number,
+      default: 0,
+    },
+
     verificationToken: String,
     verificationTokenExpiry: Date,
 
@@ -58,6 +63,10 @@ const userSchema = new mongoose.Schema(
       pincode: String,
       lat: Number,
       lng: Number,
+    },
+    phone: {
+      type: String,
+      trim: true,
     },
     trustScore: {
       type: Number,

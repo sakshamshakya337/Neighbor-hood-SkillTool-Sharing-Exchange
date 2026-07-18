@@ -4,7 +4,8 @@ const router = express.Router();
 const {
   createPayment,
   getPaymentHistory,
-  webhook,
+  verifyPayment,
+  getRazorpayKey,
 } = require("../controllers/paymentController");
 
 // Create Payment Order
@@ -13,7 +14,12 @@ router.post("/payment", createPayment);
 // Payment History
 router.get("/payment-history", getPaymentHistory);
 
-// Razorpay Webhook
-router.post("/webhook", webhook);
+
+
+// Verify Payment
+router.post("/verify", verifyPayment);
+
+// Get Razorpay Key
+router.get("/get-key", getRazorpayKey);
 
 module.exports = router;
