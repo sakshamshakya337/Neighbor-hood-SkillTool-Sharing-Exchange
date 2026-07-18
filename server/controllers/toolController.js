@@ -42,8 +42,8 @@ exports.updateTool = async (req, res) => {
     const tool = await Tool.findById(req.params.id);
     if (!tool) return res.status(404).json({ message: "Tool not found" });
 
-    // Check if the user is the owner
-    if (tool.owner.toString() !== req.user._id.toString()) {
+    // Check if the user is the owner or an admin
+    if (tool.owner.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res.status(403).json({ message: "Not authorized to update this tool" });
     }
 
@@ -60,7 +60,7 @@ exports.deleteTool = async (req, res) => {
     const tool = await Tool.findById(req.params.id);
     if (!tool) return res.status(404).json({ message: "Tool not found" });
 
-    if (tool.owner.toString() !== req.user._id.toString()) {
+    if (tool.owner.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res.status(403).json({ message: "Not authorized to delete this tool" });
     }
 

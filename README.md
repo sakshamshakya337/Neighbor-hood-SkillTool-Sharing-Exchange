@@ -5,8 +5,8 @@ This is the central repository for the Neighborhood Skill & Tool Sharing platfor
 [![DeepScan grade](https://deepscan.io/api/teams/30237/projects/32103/branches/1044001/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=30237&pid=32103&bid=1044001)
 ## API Documentation
 
-**Total APIs Integrated: 34** 
-*(8 Auth + 4 User + 7 Tool + 5 Skill + 9 Booking + 1 Health Check)*
+**Total APIs Integrated: 61** 
+*(9 Auth + 6 User + 7 Tool + 5 Skill + 9 Booking + 5 Admin + 5 Chat + 2 Notification + 3 Payment + 3 Report + 4 Review + 2 Trust Score + 1 Wishlist + 1 Health Check)*
 
 All endpoints are fully hooked up with the React frontend and are hosted within a single Vercel Serverless Function (via Express) to avoid the 12-function limit.
 
@@ -15,6 +15,7 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 |---|---|---|
 | `POST` | `/register` | Register a new user |
 | `POST` | `/login` | Login user and issue JWT |
+| `POST` | `/admin-login` | Admin login |
 | `POST` | `/logout` | Logout user and clear session |
 | `POST` | `/refresh-token` | Refresh authentication token |
 | `POST` | `/forgot-password`| Send forgot password email link |
@@ -29,6 +30,8 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `PUT` | `/profile` | Update user profile details |
 | `GET` | `/address` | Get user address |
 | `PUT` | `/address` | Update user address |
+| `GET` | `/admin` | Get Admin User Id |
+| `GET` | `/listings` | Get user listed tools and skills |
 
 ### 3. Tool APIs (7) - `/api`
 | Method | Endpoint | Description |
@@ -68,7 +71,64 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 |---|---|---|
 | `GET` | `/health` | Health check endpoint for monitoring |
 
+### 7. Admin APIs (5) - `/api/admin`
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/dashboard` | Get admin dashboard statistics |
+| `GET` | `/users` | Get list of all users |
+| `GET` | `/tools` | Get list of all tools/skills |
+| `PUT` | `/block-user` | Block or unblock a user |
+| `DELETE`| `/delete-user` | Delete a user |
+
+### 8. Chat APIs (5) - `/api/chat`
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/` | Access or create a chat with a user |
+| `GET` | `/` | Fetch all chats for the user |
+| `POST` | `/message` | Send a new message |
+| `GET` | `/:id` | Get all messages for a specific chat |
+| `DELETE`| `/:id` | Delete a chat |
+
+### 9. Notification APIs (2) - `/api/notifications`
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/` | Get all notifications |
+| `PUT` | `/read` | Mark a notification as read |
+
+### 10. Payment APIs (3) - `/api`
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/payment` | Create a new payment |
+| `GET` | `/payment-history` | Get user payment history |
+| `POST` | `/webhook` | Webhook for payment events |
+
+### 11. Report APIs (3) - `/api`
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/report` | Create a new report (e.g., issue with tool) |
+| `GET` | `/reports` | Get all reports |
+| `PUT` | `/report/resolve` | Mark a report as resolved |
+
+### 12. Review APIs (4) - `/api/review`
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/` | Add a new review |
+| `GET` | `/:toolId` | Get all reviews for a specific tool/skill |
+| `PUT` | `/:id` | Update an existing review |
+| `DELETE`| `/:id` | Delete a review |
+
+### 13. Trust Score APIs (2) - `/api`
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/trust-score` | Get the trust score for the current user |
+| `GET` | `/rating` | Get the rating details |
+
+### 14. Wishlist APIs (1) - `/api/wishlist`
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/` | Toggle a tool in the user's wishlist |
+
 ## Frontend Modules
-The frontend connects to these 34 APIs using Axios and includes the following main features:
+The frontend connects to these 61 APIs using Axios and includes the following main features:
 - **Authentication:** Registration, login, and secure sessions.
 - **Tool Listing & Booking:** Browsing tools, searching, categories, booking calendar, and rental history management.

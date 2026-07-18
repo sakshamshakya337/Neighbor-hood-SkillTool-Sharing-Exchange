@@ -43,7 +43,7 @@ exports.updateSkill = async (req, res) => {
     const skill = await Skill.findById(req.params.id);
     if (!skill) return res.status(404).json({ message: "Skill not found" });
 
-    if (skill.provider.toString() !== req.user._id.toString()) {
+    if (skill.provider.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res.status(403).json({ message: "Not authorized to update this skill" });
     }
 
@@ -60,7 +60,7 @@ exports.deleteSkill = async (req, res) => {
     const skill = await Skill.findById(req.params.id);
     if (!skill) return res.status(404).json({ message: "Skill not found" });
 
-    if (skill.provider.toString() !== req.user._id.toString()) {
+    if (skill.provider.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res.status(403).json({ message: "Not authorized to delete this skill" });
     }
 

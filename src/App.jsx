@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -15,12 +16,15 @@ import Profile from "./pages/Profile";
 import BrowseSkills from "./pages/BrowseSkills";
 import ToolsList from "./pages/ToolsList";
 import ToolDetails from "./pages/ToolDetails";
+import SkillDetails from "./pages/SkillDetails";
 import AddEditTool from "./pages/AddEditTool";
 import AddEditSkill from "./pages/AddEditSkill";
 import RentalHistory from "./pages/RentalHistory";
 import AdminDashboard from "./pages/AdminDashboard";
 import Chat from "./pages/Chat";
 import Wishlist from "./pages/Wishlist";
+import AdminLogin from "./pages/AdminLogin";
+import AdminSupportButton from "./components/AdminSupportButton";
 
 function App() {
   const location = useLocation();
@@ -40,8 +44,10 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
 
           <Route path="/skills" element={<BrowseSkills />} />
+          <Route path="/skills/:id" element={<SkillDetails />} />
           <Route path="/tools" element={<ToolsList />} />
           <Route path="/tools/:id" element={<ToolDetails />} />
 
@@ -58,16 +64,19 @@ function App() {
 
             <Route path="/rental-history" element={<RentalHistory />} />
 
-            {/* Admin */}
-            <Route path="/admin" element={<AdminDashboard />} />
-
             <Route path="/chat" element={<Chat />} />
             <Route path="/wishlist" element={<Wishlist />} />
+          </Route>
+
+          {/* Admin Protected Routes */}
+          <Route element={<AdminProtectedRoute />}>
+            <Route path="/admin" element={<AdminDashboard />} />
           </Route>
         </Routes>
       </main>
 
       {!isAdminPage && !isChatPage && <Footer />}
+      {!isAdminPage && <AdminSupportButton />}
     </div>
   );
 }

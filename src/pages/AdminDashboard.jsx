@@ -7,8 +7,14 @@ import Header from "../components/admin/Header";
 import StatCards from "../components/admin/StatCards";
 import UsersTable from "../components/admin/UsersTable";
 import ToolsTable from "../components/admin/ToolsTable";
+import SkillsTable from "../components/admin/SkillsTable";
+import PaymentsTable from "../components/admin/PaymentsTable";
+import ReportsTable from "../components/admin/ReportsTable";
+import SettingsForm from "../components/admin/SettingsForm";
+import Chat from "./Chat";
 
 export default function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState("Dashboard");
   const [dashboard, setDashboard] = useState({
     totalUsers: 0,
     totalTools: 0,
@@ -59,86 +65,63 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex bg-slate-100 min-h-screen">
-
-      <Sidebar />
-
+      <Sidebar active={activeTab} setActive={setActiveTab} />
       <div className="flex-1 overflow-y-auto p-8">
 
-        <section id="Dashboard">
+        {activeTab === "Dashboard" && (
+          <section id="Dashboard">
+            <Header />
+            <StatCards dashboard={dashboard} />
+          </section>
+        )}
 
-          <Header />
+        {activeTab === "Users" && (
+          <section id="Users">
+            <div className="bg-white rounded-2xl shadow-md p-6">
+              <UsersTable />
+            </div>
+          </section>
+        )}
 
-          <StatCards dashboard={dashboard} />
+        {activeTab === "Tools" && (
+          <section id="Tools">
+            <div className="bg-white rounded-2xl shadow-md p-6">
+              <ToolsTable />
+            </div>
+          </section>
+        )}
 
-        </section>
+        {activeTab === "Skills" && (
+          <section id="Skills">
+            <div className="bg-white rounded-2xl shadow-md p-6">
+              <SkillsTable />
+            </div>
+          </section>
+        )}
 
-        <section id="Users" className="mt-8">
+        {activeTab === "Reports" && (
+          <section id="Reports">
+            <ReportsTable />
+          </section>
+        )}
 
-          <div className="bg-white rounded-2xl shadow-md p-6">
+        {activeTab === "Payments" && (
+          <section id="Payments">
+            <PaymentsTable />
+          </section>
+        )}
 
-            <UsersTable />
+        {activeTab === "Settings" && (
+          <section id="Settings">
+            <SettingsForm />
+          </section>
+        )}
 
-          </div>
-
-        </section>
-
-        <section id="Tools" className="mt-8">
-
-          <div className="bg-white rounded-2xl shadow-md p-6">
-
-            <ToolsTable />
-
-          </div>
-
-        </section>
-
-        <section id="Reports" className="mt-8">
-
-          <div className="bg-white rounded-2xl shadow-md p-6 h-72">
-
-            <h2 className="text-3xl font-bold mb-4">
-              Reports
-            </h2>
-
-            <p className="text-slate-500">
-              Reports management will appear here.
-            </p>
-
-          </div>
-
-        </section>
-
-        <section id="Payments" className="mt-8">
-
-          <div className="bg-white rounded-2xl shadow-md p-6 h-72">
-
-            <h2 className="text-3xl font-bold mb-4">
-              Payments
-            </h2>
-
-            <p className="text-slate-500">
-              Payment history will appear here.
-            </p>
-
-          </div>
-
-        </section>
-
-        <section id="Settings" className="mt-8 mb-10">
-
-          <div className="bg-white rounded-2xl shadow-md p-6 h-72">
-
-            <h2 className="text-3xl font-bold mb-4">
-              Settings
-            </h2>
-
-            <p className="text-slate-500">
-              Admin settings will appear here.
-            </p>
-
-          </div>
-
-        </section>
+        {activeTab === "Chat" && (
+          <section id="Chat" className="h-full bg-white rounded-2xl shadow-md overflow-hidden">
+            <Chat />
+          </section>
+        )}
 
       </div>
 

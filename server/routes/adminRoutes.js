@@ -7,7 +7,12 @@ const {
   getTools,
 } = require("../controllers/adminController");
 
+const { protect, admin } = require("../middleware/authMiddleware");
+
 const router = express.Router();
+
+// Apply middleware to all routes in this file
+router.use(protect, admin);
 
 router.get("/dashboard", getDashboard);
 router.get("/users", getUsers);

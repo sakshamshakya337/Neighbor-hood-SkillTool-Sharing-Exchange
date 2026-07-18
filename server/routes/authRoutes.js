@@ -9,12 +9,14 @@ const {
   resetPassword,
   verifyEmail,
   verifyNeighborhood,
+  adminLogin,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 const { authLimiter } = require("../middleware/rateLimiter");
 
 router.post("/register", authLimiter, registerUser);
 router.post("/login", authLimiter, loginUser);
+router.post("/admin-login", authLimiter, adminLogin);
 router.post("/logout", protect, logoutUser);
 router.post("/refresh-token", refreshToken);
 router.post("/forgot-password", authLimiter, forgotPassword);

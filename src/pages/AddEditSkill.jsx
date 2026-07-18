@@ -72,7 +72,7 @@ const AddEditSkill = () => {
         await createSkill(payload);
         alert('Skill listed successfully!');
       }
-      navigate('/skills');
+      navigate('/dashboard');
     } catch (error) {
       console.error('Submission error:', error);
       alert('Failed to save skill.');
@@ -134,7 +134,7 @@ const AddEditSkill = () => {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Hourly Rate ($) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Hourly Rate (₹) *</label>
             <input
               type="number"
               name="hourlyRate"

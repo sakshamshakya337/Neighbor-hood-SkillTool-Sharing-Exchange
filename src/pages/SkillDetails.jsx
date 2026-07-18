@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getToolById } from '../api/toolApi';
+import { getSkillById } from '../api/skillApi';
 import { createBooking, getAvailability } from '../api/bookingApi';
 import AvailabilityCalendar from '../components/booking/AvailabilityCalendar';
 import BookingForm from '../components/booking/BookingForm';
 import ReviewSection from '../components/ReviewSection';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { Heart, MessageSquare, MapPin, ShieldCheck, Info, User as UserIcon, CameraOff } from 'lucide-react';
+import { Heart, MessageSquare, MapPin, ShieldCheck, Info, CameraOff } from 'lucide-react';
 
-const ToolDetails = () => {
+const SkillDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [tool, setTool] = useState(null);
+  const [skill, setSkill] = useState(null);
   const [unavailableDates, setUnavailableDates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -22,10 +22,10 @@ const ToolDetails = () => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const toolData = await getToolById(id);
-        setTool(toolData);
+        const skillData = await getSkillById(id);
+        setSkill(skillData);
         
-        const availabilityData = await getAvailability(id);
+        const availabilityData = await getAvailability(id, true);
         setUnavailableDates(availabilityData);
         
         if (user) {
@@ -35,7 +35,7 @@ const ToolDetails = () => {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch tool details:', error);
+        console.error('Failed to fetch skill details:', error);
       } finally {
         setLoading(false);
       }
@@ -47,12 +47,14 @@ const ToolDetails = () => {
   const handleBookingSubmit = async (bookingData) => {
     setBookingLoading(true);
     try {
+      bookingData.skillId = id; // Add skillId
+      delete bookingData.toolId; // Remove toolId
       await createBooking(bookingData);
-      alert('Booking created successfully! Redirecting to rental history...');
+      alert('Skill booked successfully! Redirecting to history...');
       navigate('/rental-history');
     } catch (error) {
       console.error('Booking failed:', error);
-      alert('Failed to create booking.');
+      alert('Failed to book skill.');
     } finally {
       setBookingLoading(false);
     }
@@ -61,7 +63,7 @@ const ToolDetails = () => {
   const toggleWishlist = async () => {
     if (!user) return navigate('/login');
     try {
-      const { data } = await api.post('/api/wishlist', { toolId: id });
+      const { data } = await api.post('/api/wishlist', { toolId: id }); // Uses same wishlist endpoint for now
       setIsWishlisted(data.message.includes('Added'));
     } catch (err) {
       console.error(err);
@@ -70,34 +72,28 @@ const ToolDetails = () => {
 
 
   if (loading) return <div className="text-center py-20">Loading...</div>;
-  if (!tool) return <div className="text-center py-20">Tool not found</div>;
+  if (!skill) return <div className="text-center py-20">Skill not found</div>;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 max-w-7xl">
-      {/* Header Section */}
       <div className="mb-8">
-        <h1 className="text-4xl lg:text-5xl font-black text-on-surface font-headline mb-4 tracking-tight">{tool.name}</h1>
+        <h1 className="text-4xl lg:text-5xl font-black text-on-surface font-headline mb-4 tracking-tight">{skill.title}</h1>
         <div className="flex flex-wrap items-center gap-5 text-on-surface-variant font-medium text-sm">
           <span className="flex items-center gap-1.5 bg-surface-container px-3.5 py-1.5 rounded-full border border-outline-variant/50 text-on-surface font-semibold">
-            {tool.category?.name || 'General'}
-          </span>
-          <span className="flex items-center gap-1.5 hover:text-primary transition-colors">
-            <MapPin className="w-4 h-4 text-primary" />
-            {tool.location?.address || 'Location not specified'}
+            {skill.category?.name || 'General Skill'}
           </span>
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-              <span className="text-xs font-bold text-primary">{tool.owner?.name?.charAt(0) || 'U'}</span>
+              <span className="text-xs font-bold text-primary">{skill.provider?.name?.charAt(0) || 'U'}</span>
             </div>
-            <span className="font-semibold">Hosted by {tool.owner?.name || 'Unknown'}</span>
+            <span className="font-semibold">Instructor: {skill.provider?.name || 'Unknown'}</span>
           </div>
         </div>
       </div>
 
-      {/* Hero Image */}
       <div className="w-full h-[400px] sm:h-[500px] bg-gradient-to-br from-surface-container-low to-surface-container rounded-3xl overflow-hidden relative mb-12 shadow-sm border border-outline-variant/50">
-        {tool.images && tool.images.length > 0 ? (
-          <img src={tool.images[0]} alt={tool.name} className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700 ease-out" />
+        {skill.images && skill.images.length > 0 ? (
+          <img src={skill.images[0]} alt={skill.title} className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700 ease-out" />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant/60">
             <CameraOff className="w-16 h-16 mb-4 opacity-50" />
@@ -112,38 +108,24 @@ const ToolDetails = () => {
         </button>
       </div>
 
-      {/* Main Content & Booking Form Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
-        
-        {/* Left Column: Details */}
         <div className="lg:col-span-2 space-y-12">
           
-          {/* Highlights */}
           <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-8 justify-between shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                 <Info className="w-6 h-6" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">Condition</span>
-                <span className="font-semibold text-lg text-on-surface">{tool.condition}</span>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-primary/10 rounded-2xl text-primary">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">Security Deposit</span>
-                <span className="font-semibold text-lg text-on-surface">${tool.depositAmount}</span>
+                <span className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">Hourly Rate</span>
+                <span className="font-semibold text-lg text-on-surface">₹{skill.hourlyRate}</span>
               </div>
             </div>
           </div>
           
-          {/* Description */}
           <div className="px-2">
-            <h3 className="text-2xl font-black font-headline text-on-surface mb-6">About this tool</h3>
-            <p className="text-on-surface-variant leading-relaxed text-lg whitespace-pre-line">{tool.description}</p>
+            <h3 className="text-2xl font-black font-headline text-on-surface mb-6">About this skill</h3>
+            <p className="text-on-surface-variant leading-relaxed text-lg whitespace-pre-line">{skill.description}</p>
           </div>
 
           <div className="border-t border-outline-variant/50 pt-12 px-2">
@@ -151,16 +133,15 @@ const ToolDetails = () => {
           </div>
 
           <div className="border-t border-outline-variant/50 pt-12 px-2">
-             <ReviewSection toolId={tool._id} />
+             <ReviewSection toolId={skill._id} />
           </div>
 
         </div>
         
-        {/* Right Column: Sticky Booking Widget */}
         <div className="lg:col-span-1">
           <div className="sticky top-28">
             <BookingForm 
-              tool={tool} 
+              tool={{...skill, pricePerDay: skill.hourlyRate}} 
               onSubmit={handleBookingSubmit} 
               isSubmitting={bookingLoading} 
             />
@@ -172,4 +153,4 @@ const ToolDetails = () => {
   );
 };
 
-export default ToolDetails;
+export default SkillDetails;

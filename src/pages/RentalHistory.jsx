@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { getRentalHistory } from '../api/bookingApi';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
+import api from '../api/axios';
+import { MessageCircle } from 'lucide-react';
 
 const RentalHistory = () => {
   const [history, setHistory] = useState({ rentedByMe: [], rentedToOthers: [] });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('rentedByMe');
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleMessage = async (userId) => {
+    if (!userId) return;
+    try {
+      const { data } = await api.post('/api/chat', { userId });
+      navigate('/chat', { state: { chatId: data._id } });
+    } catch (error) {
+      console.error('Failed to initiate chat', error);
+      alert('Failed to start chat. Please try again.');
+    }
+  };
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -39,7 +55,7 @@ const RentalHistory = () => {
           }`}
           onClick={() => setActiveTab('rentedByMe')}
         >
-          Tools I Rented
+          My Rentals & Bookings
         </button>
         <button
           className={`py-2 px-4 font-medium text-sm focus:outline-none ${
@@ -49,7 +65,7 @@ const RentalHistory = () => {
           }`}
           onClick={() => setActiveTab('rentedToOthers')}
         >
-          Tools Lent Out
+          My Listed Services & Tools
         </button>
       </div>
       
@@ -59,39 +75,55 @@ const RentalHistory = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {displayList.map(booking => (
-            <div key={booking._id} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                  <Link to={`/tools/${booking.tool?._id}`} className="hover:text-blue-600 hover:underline">
-                    {booking.tool?.name || 'Unknown Tool'}
+          {displayList.map(booking => {
+            const isTool = !!booking.tool;
+            const item = booking.tool || booking.skill;
+            const itemTitle = isTool ? item?.name : item?.title;
+            const itemType = isTool ? 'Tool' : 'Skill';
+            const itemLink = isTool ? `/tools/${item?._id}` : `/skills/${item?._id}`;
+
+            return (
+              <div key={booking._id} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                    <Link to={itemLink} className="hover:text-blue-600 hover:underline">
+                      {itemTitle || `Unknown ${itemType}`}
+                    </Link>
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {new Date(booking.startDate).toLocaleDateString()} to {new Date(booking.endDate).toLocaleDateString()}
+                  </p>
+                  <div className="flex items-center space-x-4 text-sm">
+                    <span className="font-medium text-gray-700">Total: ₹{booking.totalPrice}</span>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      booking.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                      booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {booking.status}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="mt-4 md:mt-0 flex space-x-3">
+                  {((activeTab === 'rentedByMe' && booking.owner && booking.owner._id !== user?._id) || (activeTab === 'rentedToOthers' && booking.renter && booking.renter._id !== user?._id)) && (
+                    <button
+                      onClick={() => handleMessage(activeTab === 'rentedByMe' ? booking.owner._id : booking.renter._id)}
+                      className="px-4 py-2 bg-primary text-white rounded-lg hover:brightness-110 transition-colors text-sm font-medium flex items-center gap-2"
+                    >
+                      <MessageCircle className="w-4 h-4" /> Message {activeTab === 'rentedByMe' ? 'Provider' : 'Renter'}
+                    </button>
+                  )}
+                  <Link
+                    to={itemLink}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium flex items-center"
+                  >
+                    View {itemType}
                   </Link>
-                </h3>
-                <p className="text-sm text-gray-600 mb-2">
-                  {new Date(booking.startDate).toLocaleDateString()} to {new Date(booking.endDate).toLocaleDateString()}
-                </p>
-                <div className="flex items-center space-x-4 text-sm">
-                  <span className="font-medium text-gray-700">Total: ${booking.totalPrice}</span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    booking.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                    booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {booking.status}
-                  </span>
                 </div>
               </div>
-              
-              <div className="mt-4 md:mt-0 flex space-x-3">
-                <Link
-                  to={`/tools/${booking.tool?._id}`}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-                >
-                  View Tool
-                </Link>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

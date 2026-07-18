@@ -5,7 +5,10 @@ const bookingSchema = new mongoose.Schema(
     tool: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tool",
-      required: true,
+    },
+    skill: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Skill",
     },
     renter: {
       type: mongoose.Schema.Types.ObjectId,

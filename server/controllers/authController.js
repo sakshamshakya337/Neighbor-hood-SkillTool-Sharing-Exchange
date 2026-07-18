@@ -11,7 +11,7 @@ const setRefreshTokenCookie = (res, token) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
   });
 };
 
@@ -102,6 +102,61 @@ const loginUser = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        isEmailVerified: user.isEmailVerified,
+        isNeighborhoodVerified: user.isNeighborhoodVerified,
+        address: user.address,
+        wishlist: user.wishlist,
+        trustScore: user.trustScore,
+        totalReviews: user.totalReviews,
+        role: user.role,
+        accessToken,
+      });
+    } else {
+      res.status(401).json({ message: "Invalid email or password" });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Admin login
+// @route   POST /api/auth/admin-login
+// @access  Public
+const adminLogin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (user && (await user.matchPassword(password))) {
+      if (user.role !== "admin") {
+        return res.status(403).json({ message: "Access denied: Not an admin" });
+      }
+
+      if (!user.isEmailVerified) {
+        return res.status(401).json({ message: "Please verify your email first." });
+      }
+
+      const accessToken = generateAccessToken(user._id);
+      const refreshToken = generateRefreshToken(user._id);
+
+      // Hash refresh token for DB storage
+      const salt = await bcrypt.genSalt(10);
+      user.refreshToken = await bcrypt.hash(refreshToken, salt);
+      await user.save();
+
+      setRefreshTokenCookie(res, refreshToken);
+
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+        isNeighborhoodVerified: user.isNeighborhoodVerified,
+        address: user.address,
+        wishlist: user.wishlist,
+        trustScore: user.trustScore,
+        totalReviews: user.totalReviews,
+        role: user.role,
         accessToken,
       });
     } else {
@@ -305,4 +360,5 @@ module.exports = {
   resetPassword,
   verifyEmail,
   verifyNeighborhood,
+  adminLogin,
 };

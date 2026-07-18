@@ -1,31 +1,26 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, ArrowRight, AlertCircle, Shield, Eye, EyeOff } from 'lucide-react';
 
-const Login = () => {
+const AdminLogin = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const [needsVerification, setNeedsVerification] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const { adminLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setNeedsVerification(false);
     setLoading(true);
     try {
-      await login(formData.email, formData.password);
-      navigate('/dashboard');
+      await adminLogin(formData.email, formData.password);
+      navigate('/admin');
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Failed to login';
+      const msg = err.response?.data?.message || err.message || 'Failed to login as admin';
       setError(msg);
-      if (msg.toLowerCase().includes('verify')) {
-        setNeedsVerification(true);
-      }
     } finally {
       setLoading(false);
     }
@@ -35,11 +30,12 @@ const Login = () => {
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-surface-container-lowest p-10 rounded-3xl shadow-2xl border border-outline-variant/30">
         <div className="text-center">
+          <Shield className="mx-auto h-12 w-12 text-primary" />
           <h2 className="mt-2 text-4xl font-black font-headline text-primary tracking-tight">
-            Welcome back
+            Admin Access
           </h2>
           <p className="mt-4 text-sm text-on-surface-variant">
-            Please enter your details to sign in
+            Secure login for administrators only
           </p>
         </div>
 
@@ -48,12 +44,6 @@ const Login = () => {
             <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-medium">{error}</p>
-              {needsVerification && (
-                <p className="mt-1 text-xs opacity-80">
-                  Please check your inbox and click the verification link.{' '}
-                  <Link to="/register" className="underline font-semibold">Re-register to resend.</Link>
-                </p>
-              )}
             </div>
           </div>
         )}
@@ -61,7 +51,7 @@ const Login = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-on-surface mb-1.5 ml-1">Email</label>
+              <label className="block text-sm font-medium text-on-surface mb-1.5 ml-1">Admin Email</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-on-surface-variant" />
@@ -70,7 +60,7 @@ const Login = () => {
                   type="email"
                   required
                   className="block w-full pl-11 pr-4 py-3 bg-surface-container-low border border-outline-variant/50 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
-                  placeholder="Enter your email"
+                  placeholder="admin@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                 />
@@ -78,12 +68,7 @@ const Login = () => {
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1.5 ml-1 pr-1">
-                <label className="block text-sm font-medium text-on-surface">Password</label>
-                <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
+              <label className="block text-sm font-medium text-on-surface mb-1.5 ml-1">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-on-surface-variant" />
@@ -113,21 +98,14 @@ const Login = () => {
               disabled={loading}
               className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-on-primary bg-primary hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Authenticating...' : 'Secure Sign In'}
               {!loading && <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />}
             </button>
           </div>
         </form>
-
-        <p className="text-center text-sm text-on-surface-variant">
-          Don't have an account?{' '}
-          <Link to="/register" className="font-bold text-primary hover:underline">
-            Sign up now
-          </Link>
-        </p>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default AdminLogin;

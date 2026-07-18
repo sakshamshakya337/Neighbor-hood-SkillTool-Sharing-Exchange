@@ -76,7 +76,7 @@ const AddEditTool = () => {
         await createTool(payload);
         alert('Tool created successfully!');
       }
-      navigate('/tools'); // Or to the user's dashboard
+      navigate('/dashboard'); // Or to the user's dashboard
     } catch (error) {
       console.error('Submission error:', error);
       alert('Failed to save tool.');
@@ -151,7 +151,7 @@ const AddEditTool = () => {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Price Per Day ($) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price Per Day (₹) *</label>
             <input
               type="number"
               name="pricePerDay"
@@ -165,7 +165,7 @@ const AddEditTool = () => {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit ($) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₹) *</label>
             <input
               type="number"
               name="depositAmount"

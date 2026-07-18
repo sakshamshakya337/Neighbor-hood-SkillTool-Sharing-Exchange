@@ -1,7 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api/axios';
 
 const Home = () => {
+  const [tools, setTools] = useState([]);
+  const [skills, setSkills] = useState([]);
+  const [loadingTools, setLoadingTools] = useState(true);
+  const [loadingSkills, setLoadingSkills] = useState(true);
+
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        const [toolsRes, skillsRes] = await Promise.all([
+          api.get('/api/tool'),
+          api.get('/api/skill')
+        ]);
+        
+        // Limit to 4 tools and 3 skills for the landing page layout
+        setTools(toolsRes.data.tools ? toolsRes.data.tools.slice(0, 4) : toolsRes.data.slice(0, 4));
+        setSkills(skillsRes.data.slice(0, 3));
+      } catch (error) {
+        console.error("Error fetching home data:", error);
+      } finally {
+        setLoadingTools(false);
+        setLoadingSkills(false);
+      }
+    };
+    
+    fetchHomeData();
+  }, []);
   return (
     <div>
       {/* Hero Section */}
@@ -52,52 +79,33 @@ const Home = () => {
           <Link className="text-primary font-bold hover:underline hidden sm:block" to="#">View All Tools →</Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="group bg-surface-container-low rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-transparent hover:border-outline-variant">
-            <div className="h-48 overflow-hidden">
-              <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Power Drill" src="https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=600&q=80"/>
-            </div>
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-bold text-lg">Power Drill</h3>
-                <span className="text-xs bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded font-bold">New</span>
+          {loadingTools ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-surface-container-low rounded-2xl h-[350px]"></div>
+            ))
+          ) : tools.length > 0 ? (
+            tools.map(tool => (
+              <div key={tool._id} className="group bg-surface-container-low rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-transparent hover:border-outline-variant flex flex-col">
+                <div className="h-48 overflow-hidden bg-slate-200">
+                  <img 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                    alt={tool.name} 
+                    src={tool.images && tool.images.length > 0 ? tool.images[0] : "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=600&q=80"}
+                  />
+                </div>
+                <div className="p-6 flex flex-col flex-1">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-lg line-clamp-1">{tool.name}</h3>
+                    {tool.condition === "New" && <span className="text-xs bg-tertiary-container text-on-tertiary-container px-2 py-1 rounded font-bold">New</span>}
+                  </div>
+                  <p className="text-sm text-on-surface-variant mb-4 line-clamp-2 flex-1">{tool.description}</p>
+                  <Link to={`/tools/${tool._id}`} className="block text-center w-full py-2 bg-primary text-on-primary rounded font-bold active:scale-95 transition-transform">Borrow</Link>
+                </div>
               </div>
-              <p className="text-sm text-on-surface-variant mb-4">18V Brushless with multiple bits. Great for home assembly.</p>
-              <button className="w-full py-2 bg-primary text-on-primary rounded font-bold active:scale-95 transition-transform">Borrow</button>
-            </div>
-          </div>
-
-          <div className="group bg-surface-container-low rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-transparent hover:border-outline-variant">
-            <div className="h-48 overflow-hidden">
-              <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Lawn Mower" src="https://images.unsplash.com/photo-1592424097491-9e7987913382?auto=format&fit=crop&w=600&q=80"/>
-            </div>
-            <div className="p-6">
-              <h3 className="font-bold text-lg mb-2">Lawn Mower</h3>
-              <p className="text-sm text-on-surface-variant mb-4">Electric, self-propelled mower. Includes bag and charger.</p>
-              <button className="w-full py-2 bg-primary text-on-primary rounded font-bold active:scale-95 transition-transform">Borrow</button>
-            </div>
-          </div>
-
-          <div className="group bg-surface-container-low rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-transparent hover:border-outline-variant">
-            <div className="h-48 overflow-hidden">
-              <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Extension Ladder" src="https://images.unsplash.com/photo-1505051508008-923feaf90263?auto=format&fit=crop&w=600&q=80"/>
-            </div>
-            <div className="p-6">
-              <h3 className="font-bold text-lg mb-2">Extension Ladder</h3>
-              <p className="text-sm text-on-surface-variant mb-4">16ft telescopic ladder. Lightweight and very sturdy.</p>
-              <button className="w-full py-2 bg-primary text-on-primary rounded font-bold active:scale-95 transition-transform">Borrow</button>
-            </div>
-          </div>
-
-          <div className="group bg-surface-container-low rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-transparent hover:border-outline-variant">
-            <div className="h-48 overflow-hidden">
-              <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Sewing Machine" src="https://images.unsplash.com/photo-1605280803522-83216c52a0ea?auto=format&fit=crop&w=600&q=80"/>
-            </div>
-            <div className="p-6">
-              <h3 className="font-bold text-lg mb-2">Sewing Machine</h3>
-              <p className="text-sm text-on-surface-variant mb-4">Heavy-duty singer machine for all fabric types.</p>
-              <button className="w-full py-2 bg-primary text-on-primary rounded font-bold active:scale-95 transition-transform">Borrow</button>
-            </div>
-          </div>
+            ))
+          ) : (
+            <p className="col-span-4 text-center text-on-surface-variant py-10">No tools available at the moment.</p>
+          )}
         </div>
       </section>
 
@@ -109,32 +117,28 @@ const Home = () => {
             <p className="text-on-surface-variant max-w-xl mx-auto">Skip the expensive classes. Real expertise is just around the corner.</p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="relative group h-[400px] rounded-3xl overflow-hidden cursor-pointer">
-              <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Intro to Carpentry" src="https://images.unsplash.com/photo-1502021680532-838cfc650323?auto=format&fit=crop&w=600&q=80"/>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
-                <h3 className="text-white text-2xl font-black mb-2">Intro to Carpentry</h3>
-                <p className="text-white/80 text-sm mb-6">Learn the basics of furniture making with Master Carpenter Dave.</p>
-                <button className="self-start px-6 py-2 bg-white text-on-surface rounded-full font-bold hover:bg-primary hover:text-white transition-colors">Learn More</button>
-              </div>
-            </div>
-
-            <div className="relative group h-[400px] rounded-3xl overflow-hidden cursor-pointer">
-              <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Organic Gardening" src="https://images.unsplash.com/photo-1416879598555-220b8f3e5898?auto=format&fit=crop&w=600&q=80"/>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
-                <h3 className="text-white text-2xl font-black mb-2">Organic Gardening</h3>
-                <p className="text-white/80 text-sm mb-6">Start your own vegetable patch with Sarah's soil-to-table workshop.</p>
-                <button className="self-start px-6 py-2 bg-white text-on-surface rounded-full font-bold hover:bg-primary hover:text-white transition-colors">Learn More</button>
-              </div>
-            </div>
-
-            <div className="relative group h-[400px] rounded-3xl overflow-hidden cursor-pointer">
-              <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Bicycle Repair" src="https://images.unsplash.com/photo-1511994298241-608e28f14fde?auto=format&fit=crop&w=600&q=80"/>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
-                <h3 className="text-white text-2xl font-black mb-2">Bicycle Repair</h3>
-                <p className="text-white/80 text-sm mb-6">Fix flats, adjust gears, and maintain your ride with Mike.</p>
-                <button className="self-start px-6 py-2 bg-white text-on-surface rounded-full font-bold hover:bg-primary hover:text-white transition-colors">Learn More</button>
-              </div>
-            </div>
+            {loadingSkills ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="animate-pulse bg-slate-200 h-[400px] rounded-3xl overflow-hidden"></div>
+              ))
+            ) : skills.length > 0 ? (
+              skills.map(skill => (
+                <div key={skill._id} className="relative group h-[400px] rounded-3xl overflow-hidden cursor-pointer">
+                  <img 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 bg-slate-200" 
+                    alt={skill.title} 
+                    src={skill.images && skill.images.length > 0 ? skill.images[0] : "https://images.unsplash.com/photo-1502021680532-838cfc650323?auto=format&fit=crop&w=600&q=80"}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
+                    <h3 className="text-white text-2xl font-black mb-2 line-clamp-1">{skill.title}</h3>
+                    <p className="text-white/80 text-sm mb-6 line-clamp-2">{skill.description}</p>
+                    <Link to={`/skills/${skill._id}`} className="self-start px-6 py-2 bg-white text-on-surface rounded-full font-bold hover:bg-primary hover:text-white transition-colors">Learn More</Link>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="col-span-3 text-center text-on-surface-variant py-10">No skills available at the moment.</p>
+            )}
           </div>
         </div>
       </section>

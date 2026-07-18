@@ -1,19 +1,29 @@
 const Booking = require("../models/Booking");
 const Tool = require("../models/Tool");
+const Skill = require("../models/Skill");
 
 // POST /api/booking
 exports.createBooking = async (req, res) => {
   try {
-    const { toolId, startDate, endDate, totalPrice } = req.body;
-    const tool = await Tool.findById(toolId);
+    const { toolId, skillId, startDate, endDate, totalPrice } = req.body;
     
-    if (!tool) return res.status(404).json({ message: "Tool not found" });
+    let item = null;
+    let type = null;
+    if (toolId) {
+      item = await Tool.findById(toolId);
+      type = "tool";
+    } else if (skillId) {
+      item = await Skill.findById(skillId);
+      type = "skill";
+    }
+    
+    if (!item) return res.status(404).json({ message: "Item not found" });
 
     // Assuming basic logic here, a robust system would check for date overlaps
     const booking = new Booking({
-      tool: toolId,
+      [type]: item._id,
       renter: req.user._id,
-      owner: tool.owner,
+      owner: item.provider || item.owner, // Skills use provider, Tools use owner
       startDate,
       endDate,
       totalPrice,
@@ -31,7 +41,7 @@ exports.getBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({
       $or: [{ renter: req.user._id }, { owner: req.user._id }]
-    }).populate("tool", "name");
+    }).populate("tool", "name").populate("skill", "title");
     res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -43,6 +53,7 @@ exports.getBookingById = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id)
       .populate("tool")
+      .populate("skill")
       .populate("renter", "name email")
       .populate("owner", "name email");
       
@@ -116,13 +127,16 @@ exports.cancelBooking = async (req, res) => {
 // GET /api/availability
 exports.getAvailability = async (req, res) => {
   try {
-    const { toolId } = req.query;
-    // Find upcoming confirmed/active bookings to mark dates as unavailable
-    const bookings = await Booking.find({ 
-        tool: toolId,
+    const { toolId, skillId } = req.query;
+    let query = {
         status: { $in: ["Confirmed", "Active", "Pending"] },
         endDate: { $gte: new Date() }
-    }).select("startDate endDate");
+    };
+    if (toolId) query.tool = toolId;
+    if (skillId) query.skill = skillId;
+    
+    // Find upcoming confirmed/active bookings to mark dates as unavailable
+    const bookings = await Booking.find(query).select("startDate endDate");
     
     res.json(bookings);
   } catch (error) {
@@ -152,8 +166,14 @@ exports.processDeposit = async (req, res) => {
 // GET /api/rental-history
 exports.getRentalHistory = async (req, res) => {
   try {
-    const rentals = await Booking.find({ renter: req.user._id }).populate("tool");
-    const givenOut = await Booking.find({ owner: req.user._id }).populate("tool");
+    const rentals = await Booking.find({ renter: req.user._id })
+      .populate("tool")
+      .populate("skill")
+      .populate("owner", "name");
+    const givenOut = await Booking.find({ owner: req.user._id })
+      .populate("tool")
+      .populate("skill")
+      .populate("renter", "name");
     
     res.json({
         rentedByMe: rentals,

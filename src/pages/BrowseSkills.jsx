@@ -1,26 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, Wrench, Code, BookOpen, Music, Camera, Paintbrush, ChevronDown, Star, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from '../api/axios';
 
-const MOCK_SKILLS = [
-  { id: 1, title: 'Carpentry Basics', provider: 'Alex Johnson', category: 'Handyman', rating: 4.8, location: 'Downtown', icon: Wrench, image: 'https://images.unsplash.com/photo-1532009877282-3340270e0529?w=500&q=80' },
-  { id: 2, title: 'React Web Development', provider: 'Sarah Chen', category: 'Tech', rating: 5.0, location: 'Northside', icon: Code, image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500&q=80' },
-  { id: 3, title: 'Guitar Lessons', provider: 'Mike Davis', category: 'Music', rating: 4.9, location: 'West End', icon: Music, image: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=500&q=80' },
-  { id: 4, title: 'Portrait Photography', provider: 'Emily White', category: 'Arts', rating: 4.7, location: 'Southside', icon: Camera, image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80' },
-  { id: 5, title: 'Math Tutoring', provider: 'David Kim', category: 'Education', rating: 4.9, location: 'University District', icon: BookOpen, image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&q=80' },
-  { id: 6, title: 'Interior Painting', provider: 'Lisa Wong', category: 'Handyman', rating: 4.6, location: 'Eastside', icon: Paintbrush, image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=500&q=80' },
-];
-
-const CATEGORIES = ['All', 'Handyman', 'Tech', 'Music', 'Arts', 'Education'];
+const CATEGORIES = ['All', 'Handyman', 'Tech', 'Music', 'Arts', 'Education', 'General'];
 
 const BrowseSkills = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [skills, setSkills] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredSkills = MOCK_SKILLS.filter(skill => {
-    const matchesSearch = skill.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          skill.provider.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || skill.category === selectedCategory;
+  useEffect(() => {
+    fetchSkills();
+  }, []);
+
+  const fetchSkills = async () => {
+    try {
+      const { data } = await api.get('/api/skill');
+      setSkills(data);
+    } catch (error) {
+      console.error('Failed to fetch skills:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredSkills = skills.filter(skill => {
+    const titleMatch = skill.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    const providerMatch = skill.provider?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = titleMatch || providerMatch;
+    
+    const catName = skill.category?.name || 'General';
+    const matchesCategory = selectedCategory === 'All' || catName === selectedCategory;
+    
     return matchesSearch && matchesCategory;
   });
 
@@ -77,19 +90,25 @@ const BrowseSkills = () => {
           <p className="text-sm font-medium text-on-surface-variant">{filteredSkills.length} results</p>
         </div>
 
-        {filteredSkills.length > 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-slate-200 h-[350px] rounded-3xl"></div>
+            ))}
+          </div>
+        ) : filteredSkills.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredSkills.map(skill => (
-              <div key={skill.id} className="group bg-surface-container-lowest rounded-3xl overflow-hidden border border-outline-variant/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
-                <div className="relative h-48 overflow-hidden">
+              <div key={skill._id} className="group bg-surface-container-lowest rounded-3xl overflow-hidden border border-outline-variant/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
+                <div className="relative h-48 overflow-hidden bg-slate-200">
                   <img 
-                    src={skill.image} 
+                    src={skill.images && skill.images.length > 0 ? skill.images[0] : "https://images.unsplash.com/photo-1502021680532-838cfc650323?auto=format&fit=crop&w=600&q=80"} 
                     alt={skill.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute top-4 left-4 bg-surface-container-lowest/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary flex items-center gap-1.5">
-                    <skill.icon className="w-3.5 h-3.5" />
-                    {skill.category}
+                    <BookOpen className="w-3.5 h-3.5" />
+                    {skill.category?.name || 'General'}
                   </div>
                 </div>
                 
@@ -98,20 +117,16 @@ const BrowseSkills = () => {
                     <h3 className="text-lg font-bold text-on-surface line-clamp-1">{skill.title}</h3>
                     <div className="flex items-center gap-1 text-sm font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md">
                       <Star className="w-3.5 h-3.5 fill-current" />
-                      {skill.rating}
+                      5.0
                     </div>
                   </div>
                   
-                  <p className="text-sm font-medium text-on-surface-variant mb-4 flex-grow">By {skill.provider}</p>
+                  <p className="text-sm font-medium text-on-surface-variant mb-4 flex-grow line-clamp-2">{skill.description}</p>
+                  <p className="text-xs font-medium text-on-surface-variant mb-4">Instructor: {skill.provider?.name || 'Unknown'}</p>
                   
-                  <div className="flex items-center gap-2 text-xs text-on-surface-variant mb-6 font-medium">
-                    <MapPin className="w-4 h-4" />
-                    {skill.location}
-                  </div>
-                  
-                  <button className="w-full py-2.5 px-4 bg-primary/10 text-primary hover:bg-primary hover:text-on-primary font-bold rounded-xl transition-colors duration-200">
-                    Request Skill
-                  </button>
+                  <Link to={`/skills/${skill._id}`} className="block text-center w-full py-2.5 px-4 bg-primary/10 text-primary hover:bg-primary hover:text-on-primary font-bold rounded-xl transition-colors duration-200">
+                    Learn More (₹{skill.hourlyRate}/hr)
+                  </Link>
                 </div>
               </div>
             ))}

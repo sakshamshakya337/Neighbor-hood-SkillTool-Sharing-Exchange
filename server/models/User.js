@@ -45,6 +45,12 @@ const userSchema = new mongoose.Schema(
 
     refreshToken: String,
 
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+
     address: {
       street: String,
       city: String,

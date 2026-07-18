@@ -55,7 +55,7 @@ const ToolCard = ({ tool }) => {
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">{tool.name}</h3>
-          <span className="text-blue-600 font-bold">${tool.pricePerDay}/day</span>
+          <span className="text-blue-600 font-bold">₹{tool.pricePerDay}/day</span>
         </div>
         <p className="text-gray-600 text-sm mb-4 line-clamp-2">{tool.description}</p>
         

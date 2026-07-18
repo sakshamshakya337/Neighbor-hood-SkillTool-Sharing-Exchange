@@ -46,9 +46,9 @@ const Profile = () => {
     setMsg({ type: '', text: '' });
     try {
       const { data } = await api.put('/api/users/address', addressData);
-      // Address update resets neighborhood verification in backend
-      updateProfileData({ address: data, isNeighborhoodVerified: false });
-      setMsg({ type: 'success', text: 'Address updated successfully! Neighborhood verification reset.' });
+      // Address update updates the local context with new address
+      updateProfileData({ address: data });
+      setMsg({ type: 'success', text: 'Address updated successfully!' });
     } catch (error) {
       setMsg({ type: 'error', text: 'Failed to update address.' });
     }

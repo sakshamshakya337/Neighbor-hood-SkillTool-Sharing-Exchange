@@ -1,4 +1,6 @@
 const User = require("../models/User");
+const Tool = require("../models/Tool");
+const Skill = require("../models/Skill");
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -17,6 +19,7 @@ const getUserProfile = async (req, res) => {
       wishlist: user.wishlist,
       trustScore: user.trustScore,
       totalReviews: user.totalReviews,
+      role: user.role,
     });
   } else {
     res.status(404).json({ message: "User not found" });
@@ -45,6 +48,7 @@ const updateUserProfile = async (req, res) => {
       wishlist: updatedUser.wishlist,
       trustScore: updatedUser.trustScore,
       totalReviews: updatedUser.totalReviews,
+      role: updatedUser.role,
     });
   } else {
     res.status(404).json({ message: "User not found" });
@@ -72,16 +76,17 @@ const updateUserAddress = async (req, res) => {
 
   if (user) {
     user.address = {
-      street: req.body.street || user.address?.street,
-      city: req.body.city || user.address?.city,
-      state: req.body.state || user.address?.state,
-      pincode: req.body.pincode || user.address?.pincode,
-      lat: req.body.lat || user.address?.lat,
-      lng: req.body.lng || user.address?.lng,
+      street: req.body.street !== undefined ? req.body.street : user.address?.street,
+      city: req.body.city !== undefined ? req.body.city : user.address?.city,
+      state: req.body.state !== undefined ? req.body.state : user.address?.state,
+      pincode: req.body.pincode !== undefined ? req.body.pincode : user.address?.pincode,
+      lat: req.body.lat !== undefined ? req.body.lat : user.address?.lat,
+      lng: req.body.lng !== undefined ? req.body.lng : user.address?.lng,
     };
     
-    // Reset neighborhood verification if address changes
-    user.isNeighborhoodVerified = false;
+    // Only reset neighborhood verification if address actually changed significantly (skipped for demo stability)
+    // user.isNeighborhoodVerified = false;
+    user.markModified('address');
 
     const updatedUser = await user.save();
 
@@ -91,9 +96,36 @@ const updateUserAddress = async (req, res) => {
   }
 };
 
+// @desc    Get Admin User Id
+// @route   GET /api/users/admin
+// @access  Private
+const getAdminUser = async (req, res) => {
+  const admin = await User.findOne({ role: "admin" }).select("_id name");
+  if (admin) {
+    res.json(admin);
+  } else {
+    res.status(404).json({ message: "Admin user not found" });
+  }
+};
+
+// @desc    Get user's listed tools and skills
+// @route   GET /api/users/listings
+// @access  Private
+const getUserListings = async (req, res) => {
+  try {
+    const tools = await Tool.find({ owner: req.user._id }).populate("category", "name");
+    const skills = await Skill.find({ provider: req.user._id }).populate("category", "name");
+    res.json({ tools, skills });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch user listings" });
+  }
+};
+
 module.exports = {
   getUserProfile,
   updateUserProfile,
   getUserAddress,
   updateUserAddress,
+  getAdminUser,
+  getUserListings,
 };

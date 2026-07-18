@@ -35,7 +35,7 @@ const BookingForm = ({ tool, onSubmit, isSubmitting }) => {
   return (
     <form onSubmit={handleSubmit} className="bg-surface p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-outline-variant">
       <div className="mb-6">
-        <span className="text-3xl font-black font-headline text-on-surface">${tool.pricePerDay}</span>
+        <span className="text-3xl font-black font-headline text-on-surface">₹{tool.pricePerDay}</span>
         <span className="text-on-surface-variant font-medium"> / day</span>
       </div>
       
@@ -80,16 +80,16 @@ const BookingForm = ({ tool, onSubmit, isSubmitting }) => {
       {totalPrice > 0 && (
         <div className="mt-6 space-y-3">
           <div className="flex justify-between text-on-surface">
-            <span className="underline decoration-outline-variant underline-offset-4">${tool.pricePerDay} x {totalPrice / tool.pricePerDay} days</span>
-            <span>${totalPrice}</span>
+            <span className="underline decoration-outline-variant underline-offset-4">₹{tool.pricePerDay} x {totalPrice / tool.pricePerDay} days</span>
+            <span>₹{totalPrice}</span>
           </div>
           <div className="flex justify-between text-on-surface">
             <span className="underline decoration-outline-variant underline-offset-4">Security Deposit</span>
-            <span>${tool.depositAmount}</span>
+            <span>₹{tool.depositAmount || 0}</span>
           </div>
           <div className="border-t border-outline-variant pt-4 mt-4 flex justify-between font-black text-lg text-on-surface">
             <span>Total</span>
-            <span>${totalPrice + tool.depositAmount}</span>
+            <span>₹{totalPrice + (tool.depositAmount || 0)}</span>
           </div>
         </div>
       )}
