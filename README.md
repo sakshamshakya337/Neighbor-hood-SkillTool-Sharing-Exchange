@@ -3,14 +3,46 @@
 This is the central repository for the Neighborhood Skill & Tool Sharing platform. The backend is an Express/Node.js application optimized for Vercel's Serverless Functions, and the frontend is a React application built with Vite and TailwindCSS.
 
 [![DeepScan grade](https://deepscan.io/api/teams/30237/projects/32103/branches/1044001/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=30237&pid=32103&bid=1044001)
+
+## 🌟 Recent Features
+
+*   **Comprehensive Booking System:** Full lifecycle management for booking tools and skills, including availability checking, requests, approvals, and cancellations.
+*   **Payment Integration:** Secure transactions and security deposit handling using Razorpay.
+*   **Admin Management Dashboard:** Complete overview of users, listings, system metrics, and moderation tools.
+
+## 🚀 Getting Started & Running Locally
+
+To get the project running seamlessly on your local machine:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/sakshamshakya337/Neighbor-hood-SkillTool-Sharing-Exchange.git
+    cd Neighbor-hood-SkillTool-Sharing-Exchange
+    ```
+
+2.  **Install Dependencies:**
+    Make sure to install dependencies from the root directory.
+    ```bash
+    npm install
+    ```
+
+3.  **Environment Variables:**
+    Create a `.env` file in the root directory and add the required variables (e.g., MongoDB URI, JWT Secret, Razorpay keys).
+
+4.  **Run the Application:**
+    Use the dev script to concurrently start both the backend Node.js server and the Vite React frontend.
+    ```bash
+    npm run dev
+    ```
+
 ## API Documentation
 
-**Total APIs Integrated: 61** 
-*(9 Auth + 6 User + 7 Tool + 5 Skill + 9 Booking + 5 Admin + 5 Chat + 2 Notification + 3 Payment + 3 Report + 4 Review + 2 Trust Score + 1 Wishlist + 1 Health Check)*
+**Total APIs Integrated: 68** 
+*(9 Auth + 6 User + 7 Tool + 5 Skill + 13 Booking + 6 Admin + 5 Chat + 2 Notification + 4 Payment + 3 Report + 4 Review + 2 Trust Score + 1 Wishlist + 1 Health Check)*
 
 All endpoints are fully hooked up with the React frontend and are hosted within a single Vercel Serverless Function (via Express) to avoid the 12-function limit.
 
-### 1. Auth APIs (8) - `/api/auth`
+### 1. Auth APIs (9) - `/api/auth`
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/register` | Register a new user |
@@ -23,7 +55,7 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `POST` | `/verify-email` | Verify user's email address |
 | `POST` | `/verify-neighborhood`| Verify user's neighborhood status |
 
-### 2. User APIs (4) - `/api/users`
+### 2. User APIs (6) - `/api/users`
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/profile` | Get logged-in user profile |
@@ -53,7 +85,7 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `PUT` | `/skill/:id` | Update a skill listing (provider only) |
 | `DELETE`| `/skill/:id` | Delete a skill listing (provider only) |
 
-### 5. Booking APIs (9) - `/api`
+### 5. Booking APIs (13) - `/api`
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/booking` | Create a new booking request |
@@ -65,13 +97,17 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `GET` | `/availability` | Get unavailable dates for a specific tool |
 | `POST` | `/deposit` | Process a security deposit payment |
 | `GET` | `/rental-history` | Get history of tools rented and lent out |
+| `POST` | `/booking/:id/remind` | Send a reminder email for an active booking |
+| `POST` | `/booking/:id/not-returned` | Mark a booking as not returned |
+| `POST` | `/booking/:id/report` | Report a renter for an issue |
+| `POST` | `/booking/:id/pay-late-fee` | Pay late fees for a booking |
 
 ### 6. System APIs (1) - `/api`
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/health` | Health check endpoint for monitoring |
 
-### 7. Admin APIs (5) - `/api/admin`
+### 7. Admin APIs (6) - `/api/admin`
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/dashboard` | Get admin dashboard statistics |
@@ -79,6 +115,7 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `GET` | `/tools` | Get list of all tools/skills |
 | `PUT` | `/block-user` | Block or unblock a user |
 | `DELETE`| `/delete-user` | Delete a user |
+| `GET` | `/bookings` | Get all bookings |
 
 ### 8. Chat APIs (5) - `/api/chat`
 | Method | Endpoint | Description |
@@ -95,12 +132,13 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `GET` | `/` | Get all notifications |
 | `PUT` | `/read` | Mark a notification as read |
 
-### 10. Payment APIs (3) - `/api`
+### 10. Payment APIs (4) - `/api`
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/payment` | Create a new payment |
 | `GET` | `/payment-history` | Get user payment history |
-| `POST` | `/webhook` | Webhook for payment events |
+| `POST` | `/verify` | Verify payment status |
+| `GET` | `/get-key` | Get Razorpay key |
 
 ### 11. Report APIs (3) - `/api`
 | Method | Endpoint | Description |
@@ -128,7 +166,9 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 |---|---|---|
 | `POST` | `/` | Toggle a tool in the user's wishlist |
 
-## Frontend Modules
-The frontend connects to these 61 APIs using Axios and includes the following main features:
+## 💻 Frontend Modules
+The frontend connects to these 68 APIs using Axios and includes the following main features:
 - **Authentication:** Registration, login, and secure sessions.
 - **Tool Listing & Booking:** Browsing tools, searching, categories, booking calendar, and rental history management.
+- **Admin Dashboard:** Moderation and stats overview.
+- **Payment & Deposits:** Seamless Razorpay integration.
