@@ -34,6 +34,10 @@ export const updateTool = async (toolId, toolData) => {
   return await api.put(`/api/tool/${toolId}`, toolData);
 };
 
+export const deleteTool = async (toolId) => {
+  return await api.delete(`/api/tool/${toolId}`);
+};
+
 export const getCategories = async () => {
   return await api.get("/api/categories");
 };
@@ -48,6 +52,10 @@ export const createSkill = async (skillData) => {
 
 export const updateSkill = async (skillId, skillData) => {
   return await api.put(`/api/skill/${skillId}`, skillData);
+};
+
+export const deleteSkill = async (skillId) => {
+  return await api.delete(`/api/skill/${skillId}`);
 };
 
 export const getPayments = async () => {

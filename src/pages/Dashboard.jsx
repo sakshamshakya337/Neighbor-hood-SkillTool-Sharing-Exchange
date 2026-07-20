@@ -4,12 +4,39 @@ import { Link } from 'react-router-dom';
 import { ShieldAlert, ShieldCheck, User, Wrench, BookOpen, Clock, Activity, ArrowRight, Mail, List, Package } from 'lucide-react';
 import { getRentalHistory } from '../api/bookingApi';
 import { getUserListings } from '../api/userApi';
+import { deleteTool } from '../api/toolApi';
+import { deleteSkill } from '../api/skillApi';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [history, setHistory] = useState({ rentedByMe: [], rentedToOthers: [] });
   const [listings, setListings] = useState({ tools: [], skills: [] });
   const [loading, setLoading] = useState(true);
+
+  const handleDeleteTool = async (id) => {
+    if (window.confirm('Are you sure you want to delete this tool?')) {
+      try {
+        await deleteTool(id);
+        setListings(prev => ({ ...prev, tools: prev.tools.filter(t => t._id !== id) }));
+      } catch (error) {
+        console.error('Failed to delete tool:', error);
+        alert('Failed to delete tool');
+      }
+    }
+  };
+
+  const handleDeleteSkill = async (id) => {
+    if (window.confirm('Are you sure you want to delete this skill?')) {
+      try {
+        await deleteSkill(id);
+        setListings(prev => ({ ...prev, skills: prev.skills.filter(s => s._id !== id) }));
+      } catch (error) {
+        console.error('Failed to delete skill:', error);
+        alert('Failed to delete skill');
+      }
+    }
+  };
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -146,7 +173,10 @@ const Dashboard = () => {
                         <p className="text-xs text-on-surface-variant">Tool • {tool.category?.name}</p>
                       </div>
                     </div>
-                    <Link to={`/tools/edit/${tool._id}`} className="px-4 py-2 text-sm font-medium border border-outline-variant rounded-lg hover:bg-surface-container-low">Edit</Link>
+                    <div className="flex items-center gap-2">
+                      <Link to={`/tools/edit/${tool._id}`} className="px-4 py-2 text-sm font-medium border border-outline-variant rounded-lg hover:bg-surface-container-low">Edit</Link>
+                      <button onClick={() => handleDeleteTool(tool._id)} className="px-4 py-2 text-sm font-medium border border-red-200 text-red-600 rounded-lg hover:bg-red-50">Delete</button>
+                    </div>
                   </div>
                 ))}
                 {listings.skills.map(skill => (
@@ -160,7 +190,10 @@ const Dashboard = () => {
                         <p className="text-xs text-on-surface-variant">Skill • {skill.category?.name}</p>
                       </div>
                     </div>
-                    <Link to={`/skills/edit/${skill._id}`} className="px-4 py-2 text-sm font-medium border border-outline-variant rounded-lg hover:bg-surface-container-low">Edit</Link>
+                    <div className="flex items-center gap-2">
+                      <Link to={`/skills/edit/${skill._id}`} className="px-4 py-2 text-sm font-medium border border-outline-variant rounded-lg hover:bg-surface-container-low">Edit</Link>
+                      <button onClick={() => handleDeleteSkill(skill._id)} className="px-4 py-2 text-sm font-medium border border-red-200 text-red-600 rounded-lg hover:bg-red-50">Delete</button>
+                    </div>
                   </div>
                 ))}
               </div>

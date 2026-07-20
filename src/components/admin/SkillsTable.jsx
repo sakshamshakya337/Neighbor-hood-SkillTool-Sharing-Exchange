@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Search, BookOpen, CircleCheck, Plus, X, Power, Edit2 } from "lucide-react";
-import { getSkills, createSkill, getCategories, updateSkill } from "../../services/adminService";
+import { Search, BookOpen, CircleCheck, Plus, X, Power, Edit2, Trash2 } from "lucide-react";
+import { getSkills, createSkill, getCategories, updateSkill, deleteSkill } from "../../services/adminService";
 
 export default function SkillsTable() {
   const [skills, setSkills] = useState([]);
@@ -98,6 +98,18 @@ export default function SkillsTable() {
     }
   };
 
+  const handleDeleteSkill = async (skillId) => {
+    if (window.confirm("Are you sure you want to delete this skill?")) {
+      try {
+        await deleteSkill(skillId);
+        loadSkills();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete skill");
+      }
+    }
+  };
+
   const filtered = skills.filter(
     (skill) =>
       skill.title?.toLowerCase().includes(search.toLowerCase()) ||
@@ -190,6 +202,13 @@ export default function SkillsTable() {
                     title="Edit Skill"
                   >
                     <Edit2 size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSkill(skill._id)}
+                    className="p-2 text-slate-500 hover:bg-slate-100 hover:text-red-600 rounded-lg transition"
+                    title="Delete Skill"
+                  >
+                    <Trash2 size={18} />
                   </button>
                 </td>
               </tr>

@@ -34,7 +34,7 @@ const Navbar = () => {
   return (
     <header className={`flex justify-between items-center px-4 md:px-6 py-3 w-full sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'shadow-lg bg-white/95 backdrop-blur-sm' : 'bg-surface'} border-b border-outline-variant`}>
       <div className="flex items-center gap-4 md:gap-8">
-        <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 text-lg md:text-xl font-headline font-black text-primary" onClick={closeMobileMenu}>
+        <Link to={user ? (user.role === 'admin' ? '/admin' : '/dashboard') : "/"} className="flex items-center gap-2 text-lg md:text-xl font-headline font-black text-primary" onClick={closeMobileMenu}>
           <Logo className="w-6 h-6 md:w-8 md:h-8 text-primary" />
           NeighborShare
         </Link>
@@ -64,7 +64,7 @@ const Navbar = () => {
             </div>
             
             <div className="hidden md:flex items-center gap-2 border-l border-outline-variant/50 pl-5">
-              <Link to="/dashboard" className="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Dashboard</Link>
+              <Link to={user.role === 'admin' ? '/admin' : '/dashboard'} className="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Dashboard</Link>
               <Link to="/profile" className="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors mx-2">Profile</Link>
               <button 
                 onClick={handleLogout} 
@@ -105,7 +105,7 @@ const Navbar = () => {
           
           {user ? (
             <div className="flex flex-col gap-3 font-medium text-lg pt-2">
-              <Link to="/dashboard" className="text-on-surface hover:text-primary" onClick={closeMobileMenu}>Dashboard</Link>
+              <Link to={user.role === 'admin' ? '/admin' : '/dashboard'} className="text-on-surface hover:text-primary" onClick={closeMobileMenu}>Dashboard</Link>
               <Link to="/profile" className="text-on-surface hover:text-primary" onClick={closeMobileMenu}>Profile</Link>
               <button 
                 onClick={handleLogout} 

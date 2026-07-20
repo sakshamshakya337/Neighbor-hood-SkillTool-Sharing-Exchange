@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Search, Wrench, CircleCheck, Plus, X, Power, Edit2 } from "lucide-react";
-import { getTools, createTool, getCategories, updateTool } from "../../services/adminService";
+import { Search, Wrench, CircleCheck, Plus, X, Power, Edit2, Trash2 } from "lucide-react";
+import { getTools, createTool, getCategories, updateTool, deleteTool } from "../../services/adminService";
 
 export default function ToolsTable() {
   const [tools, setTools] = useState([]);
@@ -99,6 +99,18 @@ export default function ToolsTable() {
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Failed to update tool availability");
+    }
+  };
+
+  const handleDeleteTool = async (toolId) => {
+    if (window.confirm("Are you sure you want to delete this tool?")) {
+      try {
+        await deleteTool(toolId);
+        loadTools();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete tool");
+      }
     }
   };
 
@@ -201,6 +213,13 @@ export default function ToolsTable() {
                     title="Edit Tool"
                   >
                     <Edit2 size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTool(tool._id)}
+                    className="p-2 text-slate-500 hover:bg-slate-100 hover:text-red-600 rounded-lg transition"
+                    title="Delete Tool"
+                  >
+                    <Trash2 size={18} />
                   </button>
                 </td>
               </tr>
