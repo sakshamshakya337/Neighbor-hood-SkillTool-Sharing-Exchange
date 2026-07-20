@@ -18,8 +18,12 @@ const Login = () => {
     setNeedsVerification(false);
     setLoading(true);
     try {
-      await login(formData.email, formData.password);
-      navigate('/dashboard');
+      const userData = await login(formData.email, formData.password);
+      if (userData?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Failed to login';
       setError(msg);

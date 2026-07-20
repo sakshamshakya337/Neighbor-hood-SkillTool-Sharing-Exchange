@@ -21,7 +21,20 @@ exports.createBooking = async (req, res) => {
     
     if (!item) return res.status(404).json({ message: "Item not found" });
 
-    // Assuming basic logic here, a robust system would check for date overlaps
+    // Check for date overlaps
+    const overlappingBooking = await Booking.findOne({
+      [type]: item._id,
+      status: { $in: ["Pending", "Confirmed", "Active"] },
+      $and: [
+        { startDate: { $lte: endDate } },
+        { endDate: { $gte: startDate } }
+      ]
+    });
+
+    if (overlappingBooking) {
+      return res.status(400).json({ message: "This item is already booked for the selected dates." });
+    }
+
     const booking = new Booking({
       [type]: item._id,
       renter: req.user._id,
