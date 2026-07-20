@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createSkill, updateSkill, getSkillById } from '../api/skillApi';
 import { getCategories } from '../api/toolApi'; // Assuming categories are shared or similar API
+import { useAuth } from '../context/AuthContext';
 
 const AddEditSkill = () => {
   const { id } = useParams();
   const isEditing = !!id;
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(isEditing);

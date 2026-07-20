@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createTool, updateTool, getToolById, getCategories } from '../api/toolApi';
+import { useAuth } from '../context/AuthContext';
 
 const AddEditTool = () => {
   const { id } = useParams();
   const isEditing = !!id;
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(isEditing);
