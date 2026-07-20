@@ -44,3 +44,23 @@ export const getRentalHistory = async () => {
   const { data } = await api.get('/api/rental-history');
   return data;
 };
+
+export const sendReminderEmail = async (id) => {
+  const { data } = await api.post(`/api/${id}/remind`);
+  return data;
+};
+
+export const markNotReturned = async (id) => {
+  const { data } = await api.post(`/api/${id}/not-returned`);
+  return data;
+};
+
+export const reportRenter = async (id) => {
+  const { data } = await api.post(`/api/${id}/report`);
+  return data;
+};
+
+export const payLateFees = async (id) => {
+  const { data } = await api.post(`/api/${id}/pay-late-fee`);
+  return data;
+};

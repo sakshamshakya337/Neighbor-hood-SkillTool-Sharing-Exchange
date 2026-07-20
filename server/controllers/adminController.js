@@ -127,10 +127,34 @@ const getTools = async (req, res) => {
   }
 };
 
+// Get All Bookings
+const getAllBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate("renter", "name email phone reportsCount isBlocked")
+      .populate("owner", "name email")
+      .populate("tool")
+      .populate("skill")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: bookings.length,
+      bookings,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getDashboard,
   getUsers,
   blockUser,
   deleteUser,
   getTools,
+  getAllBookings,
 };

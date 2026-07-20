@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getRentalHistory } from '../api/bookingApi';
+import { getRentalHistory, sendReminderEmail, markNotReturned, reportRenter, payLateFees } from '../api/bookingApi';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -20,6 +20,46 @@ const RentalHistory = () => {
     } catch (error) {
       console.error('Failed to initiate chat', error);
       alert('Failed to start chat. Please try again.');
+    }
+  };
+
+  const handleRemind = async (id) => {
+    try {
+      await sendReminderEmail(id);
+      alert('Reminder email sent to the renter.');
+    } catch (error) {
+      alert('Failed to send reminder.');
+    }
+  };
+
+  const handleMarkNotReturned = async (id) => {
+    try {
+      await markNotReturned(id);
+      alert('Item marked as Not Returned. Late fees applied.');
+      window.location.reload();
+    } catch (error) {
+      alert('Failed to mark as not returned.');
+    }
+  };
+
+  const handleReport = async (id) => {
+    if (!window.confirm("Are you sure you want to report this user? Multiple reports will block their account.")) return;
+    try {
+      const res = await reportRenter(id);
+      alert(res.message);
+    } catch (error) {
+      alert('Failed to report user.');
+    }
+  };
+
+  const handlePayLateFee = async (id) => {
+    try {
+      // Typically this would open Razorpay, but for now we just hit the endpoint directly
+      await payLateFees(id);
+      alert('Late fees paid successfully!');
+      window.location.reload();
+    } catch (error) {
+      alert('Failed to pay late fees.');
     }
   };
 
@@ -102,16 +142,42 @@ const RentalHistory = () => {
                     }`}>
                       {booking.status}
                     </span>
+                    {booking.returnStatus && booking.returnStatus !== 'Pending' && (
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        booking.returnStatus === 'Returned' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {booking.returnStatus} {booking.lateFees > 0 && `(Late Fee: ₹${booking.lateFees})`}
+                      </span>
+                    )}
                   </div>
                 </div>
                 
-                <div className="mt-4 md:mt-0 flex space-x-3">
+                <div className="mt-4 md:mt-0 flex flex-wrap gap-2">
+                  {activeTab === 'rentedToOthers' && booking.status === 'Confirmed' && booking.returnStatus !== 'Returned' && (
+                    <>
+                      <button onClick={() => handleRemind(booking._id)} className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-xs font-medium hover:bg-blue-100">
+                        Remind
+                      </button>
+                      <button onClick={() => handleMarkNotReturned(booking._id)} className="px-3 py-1.5 bg-orange-50 text-orange-600 rounded text-xs font-medium hover:bg-orange-100">
+                        Mark Not Returned
+                      </button>
+                      <button onClick={() => handleReport(booking._id)} className="px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs font-medium hover:bg-red-100">
+                        Report
+                      </button>
+                    </>
+                  )}
+                  {activeTab === 'rentedByMe' && booking.returnStatus === 'Not Returned' && booking.lateFees > 0 && (
+                    <button onClick={() => handlePayLateFee(booking._id)} className="px-3 py-1.5 bg-green-50 text-green-600 rounded text-xs font-medium hover:bg-green-100">
+                      Pay Late Fee (₹{booking.lateFees})
+                    </button>
+                  )}
+
                   {((activeTab === 'rentedByMe' && booking.owner && booking.owner._id !== user?._id) || (activeTab === 'rentedToOthers' && booking.renter && booking.renter._id !== user?._id)) && (
                     <button
                       onClick={() => handleMessage(activeTab === 'rentedByMe' ? booking.owner._id : booking.renter._id)}
                       className="px-4 py-2 bg-primary text-white rounded-lg hover:brightness-110 transition-colors text-sm font-medium flex items-center gap-2"
                     >
-                      <MessageCircle className="w-4 h-4" /> Message {activeTab === 'rentedByMe' ? 'Provider' : 'Renter'}
+                      <MessageCircle className="w-4 h-4" /> Message
                     </button>
                   )}
                   <Link

@@ -5,6 +5,7 @@ const {
   blockUser,
   deleteUser,
   getTools,
+  getAllBookings,
 } = require("../controllers/adminController");
 
 const { protect, admin } = require("../middleware/authMiddleware");
@@ -19,5 +20,6 @@ router.get("/users", getUsers);
 router.get("/tools", getTools);
 router.put("/block-user", blockUser);
 router.delete("/delete-user", deleteUser);
+router.get("/bookings", getAllBookings);
 
 module.exports = router;
