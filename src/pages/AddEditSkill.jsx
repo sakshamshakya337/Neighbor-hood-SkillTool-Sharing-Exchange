@@ -19,7 +19,8 @@ const AddEditSkill = () => {
     description: '',
     category: '',
     hourlyRate: '',
-    address: ''
+    address: '',
+    imageUrl: ''
   });
 
   useEffect(() => {
@@ -35,7 +36,8 @@ const AddEditSkill = () => {
             description: skill.description,
             category: skill.category?._id || skill.category,
             hourlyRate: skill.hourlyRate,
-            address: skill.location?.address || ''
+            address: skill.location?.address || '',
+            imageUrl: skill.images && skill.images.length > 0 ? skill.images[0] : ''
           });
         }
       } catch (error) {
@@ -68,7 +70,8 @@ const AddEditSkill = () => {
           type: 'Point',
           coordinates: [0, 0],
           address: formData.address
-        }
+        },
+        images: formData.imageUrl ? [formData.imageUrl] : []
       };
 
       if (isEditing) {
@@ -162,6 +165,18 @@ const AddEditSkill = () => {
             value={formData.address}
             onChange={handleChange}
             placeholder="e.g. Springfield Area"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+          <input
+            type="url"
+            name="imageUrl"
+            value={formData.imageUrl}
+            onChange={handleChange}
+            placeholder="https://example.com/image.jpg"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           />
         </div>

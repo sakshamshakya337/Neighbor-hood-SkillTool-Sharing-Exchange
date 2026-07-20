@@ -20,7 +20,8 @@ const AddEditTool = () => {
     pricePerDay: '',
     depositAmount: '',
     condition: 'Good',
-    address: ''
+    address: '',
+    imageUrl: ''
   });
 
   useEffect(() => {
@@ -38,7 +39,8 @@ const AddEditTool = () => {
             pricePerDay: tool.pricePerDay,
             depositAmount: tool.depositAmount,
             condition: tool.condition,
-            address: tool.location?.address || ''
+            address: tool.location?.address || '',
+            imageUrl: tool.images && tool.images.length > 0 ? tool.images[0] : ''
           });
         }
       } catch (error) {
@@ -72,7 +74,8 @@ const AddEditTool = () => {
           type: 'Point',
           coordinates: [0, 0], // In a real app, geocode the address
           address: formData.address
-        }
+        },
+        images: formData.imageUrl ? [formData.imageUrl] : []
       };
 
       if (isEditing) {
@@ -193,6 +196,18 @@ const AddEditTool = () => {
             value={formData.address}
             onChange={handleChange}
             placeholder="e.g. 123 Main St, Springfield"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+          <input
+            type="url"
+            name="imageUrl"
+            value={formData.imageUrl}
+            onChange={handleChange}
+            placeholder="https://example.com/image.jpg"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           />
         </div>
