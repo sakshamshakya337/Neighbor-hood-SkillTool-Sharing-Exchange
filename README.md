@@ -1,46 +1,86 @@
-# Neighborhood Skill & Tool Sharing Exchange
+# 🏘️ Neighborhood Skill & Tool Sharing Exchange
 
-This is the central repository for the Neighborhood Skill & Tool Sharing platform. The backend is an Express/Node.js application optimized for Vercel's Serverless Functions, and the frontend is a React application built with Vite and TailwindCSS.
-
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)
 [![DeepScan grade](https://deepscan.io/api/teams/30237/projects/32103/branches/1044001/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=30237&pid=32103&bid=1044001)
 
-## 🌟 Recent Features
+A robust, full-stack platform empowering communities to connect, share physical tools, and offer skills to one another. Built on the MERN stack with modern frontend tooling, this platform features real-time chat, a complete booking and review system, payment gateways, and admin dashboards.
 
-*   **Comprehensive Booking System:** Full lifecycle management for booking tools and skills, including availability checking, requests, approvals, and cancellations.
-*   **Payment Integration:** Secure transactions and security deposit handling using Razorpay.
-*   **Admin Management Dashboard:** Complete overview of users, listings, system metrics, and moderation tools.
+---
+
+## 🌟 Key Features
+
+- **Comprehensive Booking System:** Full lifecycle management for booking tools and skills, including availability checking, requests, approvals, late-fee management, and cancellations.
+- **Secure Payments & Deposits:** Integrated with Razorpay to handle security deposits, rental payments, and late fees securely.
+- **Real-Time Communication:** Real-time chat integration using Socket.io for immediate coordination between neighbors.
+- **Robust Trust & Safety:** Built-in review systems, trust scores, reporting features, and verification checks.
+- **Admin Management Dashboard:** Complete overview of users, listings, system metrics, reports, and moderation capabilities (block/delete users).
+- **Modern UI/UX:** A responsive, highly performant interface built with React 19, Vite, and TailwindCSS v4.
+
+---
+
+## 💻 Tech Stack
+
+### Frontend
+- **React 19** & **React Router v7**
+- **Vite** (Next-generation frontend tooling)
+- **Tailwind CSS v4** (Utility-first styling)
+- **Lucide React** & **React Icons**
+- **Socket.io-client** (Real-time updates)
+- **Axios** (API requests)
+
+### Backend
+- **Node.js** & **Express 5**
+- **MongoDB** & **Mongoose**
+- **JSON Web Tokens (JWT)** & **Bcrypt** (Authentication)
+- **Socket.io** (WebSockets)
+- **Razorpay** (Payment Gateway Integration)
+- **Nodemailer** (Email notifications)
+
+---
 
 ## 🚀 Getting Started & Running Locally
 
 To get the project running seamlessly on your local machine:
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/sakshamshakya337/Neighbor-hood-SkillTool-Sharing-Exchange.git
-    cd Neighbor-hood-SkillTool-Sharing-Exchange
-    ```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/sakshamshakya337/Neighbor-hood-SkillTool-Sharing-Exchange.git
+   cd Neighbor-hood-SkillTool-Sharing-Exchange
+   ```
 
-2.  **Install Dependencies:**
-    Make sure to install dependencies from the root directory.
-    ```bash
-    npm install
-    ```
+2. **Install Dependencies:**
+   Make sure to install dependencies from the root directory.
+   ```bash
+   npm install
+   ```
 
-3.  **Environment Variables:**
-    Create a `.env` file in the root directory and add the required variables (e.g., MongoDB URI, JWT Secret, Razorpay keys).
+3. **Environment Variables:**
+   Create a `.env` file in the root directory and configure the required variables:
+   ```env
+   PORT=5000
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret
+   CLIENT_URL=http://localhost:5173
+   RAZORPAY_KEY_ID=your_razorpay_key_id
+   RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+   # Other email/SMTP configurations...
+   ```
 
-4.  **Run the Application:**
-    Use the dev script to concurrently start both the backend Node.js server and the Vite React frontend.
-    ```bash
-    npm run dev
-    ```
+4. **Run the Application:**
+   Use the `dev` script to concurrently start both the backend Node.js server and the Vite React frontend.
+   ```bash
+   npm run dev
+   ```
+   *Frontend will run on `http://localhost:5173` and backend on `http://localhost:5000`.*
 
-## API Documentation
+---
+
+## 📚 API Documentation
 
 **Total APIs Integrated: 68** 
-*(9 Auth + 6 User + 7 Tool + 5 Skill + 13 Booking + 6 Admin + 5 Chat + 2 Notification + 4 Payment + 3 Report + 4 Review + 2 Trust Score + 1 Wishlist + 1 Health Check)*
 
-All endpoints are fully hooked up with the React frontend and are hosted within a single Vercel Serverless Function (via Express) to avoid the 12-function limit.
+The backend architecture consists of 68 APIs, perfectly structured and grouped. All endpoints are fully hooked up with the React frontend and are optimized for Serverless deployment.
 
 ### 1. Auth APIs (9) - `/api/auth`
 | Method | Endpoint | Description |
@@ -62,7 +102,7 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `PUT` | `/profile` | Update user profile details |
 | `GET` | `/address` | Get user address |
 | `PUT` | `/address` | Update user address |
-| `GET` | `/admin` | Get Admin User Id |
+| `GET` | `/admin` | Get Admin User details |
 | `GET` | `/listings` | Get user listed tools and skills |
 
 ### 3. Tool APIs (7) - `/api`
@@ -71,8 +111,8 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `POST` | `/tool` | Add a new tool listing |
 | `GET` | `/tool` | Get all available tools |
 | `GET` | `/tool/:id` | Get details of a specific tool |
-| `PUT` | `/tool/:id` | Update a tool listing (owner only) |
-| `DELETE`| `/tool/:id` | Delete a tool listing (owner only) |
+| `PUT` | `/tool/:id` | Update a tool listing |
+| `DELETE`| `/tool/:id` | Delete a tool listing |
 | `GET` | `/categories` | Get all tool categories |
 | `GET` | `/search` | Search tools by keyword or category |
 
@@ -82,8 +122,8 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `POST` | `/skill` | Add a new skill listing |
 | `GET` | `/skill` | Get all available skills |
 | `GET` | `/skill/:id` | Get details of a specific skill |
-| `PUT` | `/skill/:id` | Update a skill listing (provider only) |
-| `DELETE`| `/skill/:id` | Delete a skill listing (provider only) |
+| `PUT` | `/skill/:id` | Update a skill listing |
+| `DELETE`| `/skill/:id` | Delete a skill listing |
 
 ### 5. Booking APIs (13) - `/api`
 | Method | Endpoint | Description |
@@ -102,12 +142,7 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `POST` | `/booking/:id/report` | Report a renter for an issue |
 | `POST` | `/booking/:id/pay-late-fee` | Pay late fees for a booking |
 
-### 6. System APIs (1) - `/api`
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/health` | Health check endpoint for monitoring |
-
-### 7. Admin APIs (6) - `/api/admin`
+### 6. Admin APIs (6) - `/api/admin`
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/dashboard` | Get admin dashboard statistics |
@@ -115,9 +150,9 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `GET` | `/tools` | Get list of all tools/skills |
 | `PUT` | `/block-user` | Block or unblock a user |
 | `DELETE`| `/delete-user` | Delete a user |
-| `GET` | `/bookings` | Get all bookings |
+| `GET` | `/bookings` | Get all system bookings |
 
-### 8. Chat APIs (5) - `/api/chat`
+### 7. Chat APIs (5) - `/api/chat`
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/` | Access or create a chat with a user |
@@ -126,28 +161,15 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `GET` | `/:id` | Get all messages for a specific chat |
 | `DELETE`| `/:id` | Delete a chat |
 
-### 9. Notification APIs (2) - `/api/notifications`
+### 8. Payment APIs (4) - `/api`
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/` | Get all notifications |
-| `PUT` | `/read` | Mark a notification as read |
-
-### 10. Payment APIs (4) - `/api`
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/payment` | Create a new payment |
+| `POST` | `/payment` | Create a new Razorpay payment |
 | `GET` | `/payment-history` | Get user payment history |
-| `POST` | `/verify` | Verify payment status |
-| `GET` | `/get-key` | Get Razorpay key |
+| `POST` | `/verify` | Verify payment status with webhook |
+| `GET` | `/get-key` | Get Razorpay client key |
 
-### 11. Report APIs (3) - `/api`
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/report` | Create a new report (e.g., issue with tool) |
-| `GET` | `/reports` | Get all reports |
-| `PUT` | `/report/resolve` | Mark a report as resolved |
-
-### 12. Review APIs (4) - `/api/review`
+### 9. Review APIs (4) - `/api/review`
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/` | Add a new review |
@@ -155,20 +177,34 @@ All endpoints are fully hooked up with the React frontend and are hosted within 
 | `PUT` | `/:id` | Update an existing review |
 | `DELETE`| `/:id` | Delete a review |
 
-### 13. Trust Score APIs (2) - `/api`
+### 10. Report APIs (3) - `/api`
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/report` | Create a new report (issue with tool/user) |
+| `GET` | `/reports` | Get all reports (Admin) |
+| `PUT` | `/report/resolve` | Mark a report as resolved |
+
+### 11. Notification APIs (2) - `/api/notifications`
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/` | Get all notifications for user |
+| `PUT` | `/read` | Mark notifications as read |
+
+### 12. Trust Score APIs (2) - `/api`
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/trust-score` | Get the trust score for the current user |
 | `GET` | `/rating` | Get the rating details |
 
-### 14. Wishlist APIs (1) - `/api/wishlist`
+### 13. Wishlist APIs (1) - `/api/wishlist`
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/` | Toggle a tool in the user's wishlist |
+| `POST` | `/` | Toggle a tool/skill in the user's wishlist |
 
-## 💻 Frontend Modules
-The frontend connects to these 68 APIs using Axios and includes the following main features:
-- **Authentication:** Registration, login, and secure sessions.
-- **Tool Listing & Booking:** Browsing tools, searching, categories, booking calendar, and rental history management.
-- **Admin Dashboard:** Moderation and stats overview.
-- **Payment & Deposits:** Seamless Razorpay integration.
+### 14. System APIs (1) - `/api`
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Health check endpoint for monitoring |
+
+---
+*Maintained by the Neighborhood Skill & Tool Sharing Exchange community.*
