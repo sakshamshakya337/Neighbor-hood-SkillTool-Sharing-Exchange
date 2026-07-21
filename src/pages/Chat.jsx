@@ -82,6 +82,8 @@ const Chat = () => {
   }, [selectedChat]);
 
   useEffect(() => {
+    if (!socketConnected) return;
+
     const messageListener = (newMessageReceived) => {
       const receivedChatId =
         typeof newMessageReceived.chatId === 'string'
@@ -89,9 +91,11 @@ const Chat = () => {
           : newMessageReceived.chatId?._id;
 
       if (!selectedChat || selectedChat._id !== receivedChatId) {
-        // Notification logic could go here
+        // Notification logic or update chat list for unread messages
+        fetchChats();
       } else {
         setMessages((prev) => [...prev, newMessageReceived]);
+        fetchChats(); // Update last message in chat list
       }
     };
 
@@ -100,7 +104,7 @@ const Chat = () => {
     return () => {
       socket.current?.off("message received", messageListener);
     };
-  }, [selectedChat]);
+  }, [selectedChat, socketConnected]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
