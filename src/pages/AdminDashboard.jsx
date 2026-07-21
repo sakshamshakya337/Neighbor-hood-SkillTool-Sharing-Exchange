@@ -65,7 +65,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex bg-slate-100 min-h-screen">
+    <div className="flex bg-slate-50/50 min-h-screen">
       <Sidebar active={activeTab} setActive={setActiveTab} />
       <div className="flex-1 overflow-y-auto p-8">
 

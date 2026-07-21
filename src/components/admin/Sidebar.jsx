@@ -65,35 +65,35 @@ export default function Sidebar({ active, setActive }) {
   };
 
   return (
-    <aside className="w-72 h-screen bg-slate-900 text-white shadow-2xl sticky top-0 flex flex-col">
-      <div className="px-8 py-8 border-b border-slate-700 shrink-0">
-        <h1 className="text-4xl font-bold">NeighborShare</h1>
+    <aside className="w-72 h-screen bg-white text-slate-700 shadow-sm border-r border-slate-200 sticky top-0 flex flex-col">
+      <div className="px-8 py-8 border-b border-slate-200 shrink-0">
+        <h1 className="text-3xl font-black text-slate-800 tracking-tight">NeighborShare</h1>
 
-        <p className="text-slate-400 mt-2">
+        <p className="text-slate-500 font-medium text-sm mt-1 uppercase tracking-wider">
           Admin Panel
         </p>
       </div>
 
-      <nav className="mt-5 px-4 space-y-2 flex-1 overflow-y-auto">
+      <nav className="mt-6 px-4 space-y-1.5 flex-1 overflow-y-auto">
 
         {menus.map((item) => {
           const Icon = item.icon;
+          const isActive = active === item.title;
 
           return (
             <button
               key={item.title}
               onClick={() => setActive(item.title)}
-              className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-300
-
+              className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-lg transition-all duration-200 border-l-4
               ${
-                active === item.title
-                  ? "bg-blue-600 shadow-lg"
-                  : "hover:bg-slate-800"
+                isActive
+                  ? "bg-blue-50/70 border-blue-600 text-blue-700 font-semibold shadow-[0_1px_3px_rgba(37,99,235,0.05)]"
+                  : "border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300"
               }`}
             >
-              <Icon size={22} />
+              <Icon size={20} className={isActive ? "text-blue-600" : "text-slate-400"} />
 
-              <span className="font-medium">
+              <span className={isActive ? "font-semibold" : "font-medium"}>
                 {item.title}
               </span>
             </button>
@@ -102,11 +102,11 @@ export default function Sidebar({ active, setActive }) {
 
       </nav>
 
-      <div className="p-4 mt-auto shrink-0">
+      <div className="p-6 mt-auto shrink-0 border-t border-slate-100">
 
         <button 
           onClick={handleLogout}
-          className="w-full bg-red-500 hover:bg-red-600 rounded-xl py-4 flex justify-center items-center gap-3 transition"
+          className="w-full bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 hover:border-red-200 rounded-xl py-3.5 flex justify-center items-center gap-3 transition-colors font-medium shadow-sm"
         >
 
           <LogOut size={20} />
