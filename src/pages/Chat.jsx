@@ -34,8 +34,9 @@ const Chat = () => {
 
     return () => {
       socket.current?.disconnect();
+      setSocketConnected(false);
     };
-  }, [user]);
+  }, [user?._id]);
 
   useEffect(() => {
     fetchChats();
@@ -95,8 +96,10 @@ const Chat = () => {
         fetchChats();
       } else {
         setMessages((prev) => [...prev, newMessageReceived]);
-        fetchChats(); // Update last message in chat list
       }
+      
+      // Update chat list to show latest message
+      fetchChats();
     };
 
     socket.current?.on("message received", messageListener);
@@ -116,15 +119,20 @@ const Chat = () => {
       if (!selectedChat || !newMessage.trim()) return;
       socket.current?.emit("stop typing", selectedChat._id);
       
+      const messageContent = newMessage;
+      setNewMessage("");
+      
       try {
         const { data } = await api.post("/api/chat/message", {
-          content: newMessage,
+          content: messageContent,
           chatId: selectedChat._id,
         });
         
-        setNewMessage("");
         socket.current?.emit("new message", data);
-        setMessages((prev) => [...prev, data]);
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === data._id)) return prev;
+          return [...prev, data];
+        });
         fetchChats(); // Update last message in chat list
       } catch (error) {
         console.error("Failed to send message", error);
