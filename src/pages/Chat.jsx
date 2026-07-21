@@ -34,6 +34,7 @@ const Chat = () => {
 
     return () => {
       socket.current?.disconnect();
+      setSocketConnected(false);
     };
   }, [user?._id]);
 
@@ -82,6 +83,8 @@ const Chat = () => {
   }, [selectedChat]);
 
   useEffect(() => {
+    if (!socketConnected) return;
+
     const messageListener = (newMessageReceived) => {
       const receivedChatId =
         typeof newMessageReceived.chatId === 'string'
@@ -103,7 +106,7 @@ const Chat = () => {
     return () => {
       socket.current?.off("message received", messageListener);
     };
-  }, [selectedChat]);
+  }, [selectedChat, socketConnected]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
