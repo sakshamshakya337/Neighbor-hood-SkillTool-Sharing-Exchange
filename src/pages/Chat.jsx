@@ -35,7 +35,7 @@ const Chat = () => {
     return () => {
       socket.current?.disconnect();
     };
-  }, [user]);
+  }, [user?._id]);
 
   useEffect(() => {
     fetchChats();
@@ -93,6 +93,9 @@ const Chat = () => {
       } else {
         setMessages((prev) => [...prev, newMessageReceived]);
       }
+      
+      // Update chat list to show latest message
+      fetchChats();
     };
 
     socket.current?.on("message received", messageListener);
