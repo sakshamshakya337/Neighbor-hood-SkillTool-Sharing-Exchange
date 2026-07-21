@@ -94,7 +94,12 @@ const Chat = () => {
       if (!selectedChat || selectedChat._id !== receivedChatId) {
         // Notification logic could go here
       } else {
-        setMessages((prev) => [...prev, newMessageReceived]);
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === newMessageReceived._id)) {
+            return prev;
+          }
+          return [...prev, newMessageReceived];
+        });
       }
       
       // Update chat list to show latest message
@@ -118,15 +123,20 @@ const Chat = () => {
       if (!selectedChat || !newMessage.trim()) return;
       socket.current?.emit("stop typing", selectedChat._id);
       
+      const messageContent = newMessage;
+      setNewMessage("");
+      
       try {
         const { data } = await api.post("/api/chat/message", {
-          content: newMessage,
+          content: messageContent,
           chatId: selectedChat._id,
         });
         
-        setNewMessage("");
         socket.current?.emit("new message", data);
-        setMessages((prev) => [...prev, data]);
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === data._id)) return prev;
+          return [...prev, data];
+        });
         fetchChats(); // Update last message in chat list
       } catch (error) {
         console.error("Failed to send message", error);
