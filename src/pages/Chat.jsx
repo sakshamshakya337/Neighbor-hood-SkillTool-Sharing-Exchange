@@ -82,20 +82,29 @@ const Chat = () => {
     fetchMessages();
   }, [selectedChat]);
 
+  const selectedChatRef = useRef(selectedChat);
+  useEffect(() => {
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
+
   useEffect(() => {
     if (!socketConnected) return;
 
     const messageListener = (newMessageReceived) => {
+      const currentSelectedChat = selectedChatRef.current;
       const receivedChatId =
         typeof newMessageReceived.chatId === 'string'
           ? newMessageReceived.chatId
           : newMessageReceived.chatId?._id;
 
-      if (!selectedChat || selectedChat._id !== receivedChatId) {
+      if (!currentSelectedChat || currentSelectedChat._id !== receivedChatId) {
         // Notification logic or update chat list for unread messages
         fetchChats();
       } else {
-        setMessages((prev) => [...prev, newMessageReceived]);
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === newMessageReceived._id)) return prev;
+          return [...prev, newMessageReceived];
+        });
       }
       
       // Update chat list to show latest message
@@ -107,7 +116,7 @@ const Chat = () => {
     return () => {
       socket.current?.off("message received", messageListener);
     };
-  }, [selectedChat, socketConnected]);
+  }, [socketConnected]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
